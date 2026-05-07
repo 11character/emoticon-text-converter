@@ -252,9 +252,11 @@ export class EmoticonTextConverter {
 
     if (e.key === 'Enter') {
       if (!this.state.isImeInput && !this.state.isDownCtrl && !this.state.isDownAlt && !this.state.isDownMeta) {
-        // disableEnter가 false일 때만 라이브러리 차원의 줄바꿈을 수행합니다.
-        if (!this.options.disableEnter) {
-          e.preventDefault();
+        // Shift + Enter는 항상 줄바꿈을 허용하고, 일반 Enter는 옵션에 따릅니다.
+        const shouldInsertLineBreak = this.state.isDownShift || !this.options.disableEnter;
+        
+        e.preventDefault();
+        if (shouldInsertLineBreak) {
           this.insertLineBreak();
         }
       }

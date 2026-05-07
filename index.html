@@ -164,9 +164,9 @@
                 <div class="control-group">
                     <h3>이모티콘 빠른 추가</h3>
                     <div class="flex-row">
-                        <button onclick="appendEmoji('smile', 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png')">😊 :smile:</button>
-                        <button onclick="appendEmoji('heart', 'https://cdn-icons-png.flaticon.com/512/833/833472.png')">❤️ :heart:</button>
-                        <button onclick="appendEmoji('vip-star', 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png')">⭐ :vip-star:</button>
+                        <button onclick="appendEmoji('smile', 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png')">😊 :smile: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('heart', 'https://cdn-icons-png.flaticon.com/512/833/833472.png')">❤️ :heart: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('vip-star', 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png')">⭐ :vip-star: <small style="color: #888">(premium)</small></button>
                     </div>
                 </div>
 
@@ -186,7 +186,7 @@
                     <h3>기능 옵션</h3>
                     <div class="flex-row">
                         <label class="toggle-item">
-                            <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> 엔터 기능 비활성화 (disableEnter)
+                            <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> 엔터 줄바꿈 비활성화 (Shift+Enter는 허용)
                         </label>
                     </div>
                 </div>

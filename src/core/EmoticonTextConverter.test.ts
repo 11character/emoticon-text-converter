@@ -130,8 +130,10 @@ describe('EmoticonTextConverter', () => {
     const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
     newTarget.dispatchEvent(event);
     
-    // With disableEnter: true, the library should NOT preventDefault
-    expect(preventDefaultSpy).not.toHaveBeenCalled();
+    // With disableEnter: true, the library should still preventDefault to block browser default
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    // But text should NOT contain a newline
+    expect(disableEnterConverter.getText()).not.toContain('\n');
     
     document.body.removeChild(newTarget);
   });
