@@ -7,126 +7,287 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding: 40px;
-            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .header {
+            background: #fff;
+            padding: 12px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            z-index: 10;
         }
         h1 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #333;
+            font-size: 18px;
+            margin: 0;
+            color: #1c1e21;
+        }
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+        .left-panel {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #eee;
+        }
+        .right-panel {
+            flex: 1;
+            background: #222;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .editor-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         #editor-container {
-            border: 1px solid #ddd;
+            border: 2px solid #e4e6eb;
             border-radius: 8px;
-            padding: 12px;
-            min-height: 100px;
-            margin-bottom: 16px;
+            padding: 16px;
+            min-height: 120px;
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
+            transition: border-color 0.2s;
         }
-        #editor-container:focus-within {
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        #editor-container:focus {
+            border-color: #1877f2;
         }
-        .controls {
+        #editor-container[data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: #8a8d91;
+            pointer-events: none;
+        }
+        .control-panel {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .control-group {
+            margin-bottom: 16px;
+        }
+        .control-group h3 {
+            font-size: 14px;
+            margin: 0 0 12px 0;
+            color: #65676b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .flex-row {
             display: flex;
             gap: 8px;
-            margin-bottom: 16px;
             flex-wrap: wrap;
         }
         button {
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 6px;
             border: 1px solid #ddd;
-            background: white;
+            background: #fff;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
         button:hover {
-            background: #f0f0f0;
+            background: #f2f2f2;
         }
-        .emoticon-btn {
+        button.active {
+            background: #ebf5ff;
+            border-color: #1877f2;
+            color: #1877f2;
+        }
+        .toggle-item {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 6px 0;
         }
-        .log {
-            background: #222;
-            color: #0f0;
+        .console-header {
+            padding: 12px 16px;
+            background: #333;
+            font-size: 12px;
+            font-weight: bold;
+            color: #aaa;
+            display: flex;
+            justify-content: space-between;
+        }
+        .log-list {
+            flex: 1;
             padding: 12px;
-            border-radius: 6px;
-            font-family: monospace;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
             font-size: 12px;
-            height: 100px;
             overflow-y: auto;
+            line-height: 1.4;
         }
-        .label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 4px;
-            display: block;
+        .log-entry {
+            margin-bottom: 8px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
         }
+        .log-time { color: #888; margin-right: 8px; }
+        .log-type { color: #4ec9b0; font-weight: bold; margin-right: 8px; }
+        .log-msg { color: #ce9178; word-break: break-all; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Emoticon Text Converter Demo</h1>
-        
-        <span class="label">입력 창 ( :smile: 이나 :heart: 를 입력해보세요)</span>
-        <div id="editor-container"></div>
-        
-        <div class="controls">
-            <button class="emoticon-btn" onclick="appendEmoji('smile', 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png')">
-                <img src="https://cdn-icons-png.flaticon.com/512/1933/1933691.png" width="20" height="20"> :smile: 추가
-            </button>
-            <button class="emoticon-btn" onclick="appendEmoji('heart', 'https://cdn-icons-png.flaticon.com/512/833/833472.png')">
-                <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" width="20" height="20"> :heart: 추가
-            </button>
-            <button onclick="clearEditor()">비우기</button>
+    <div class="header">
+        <h1>Emoticon Text Converter Playground</h1>
+    </div>
+    
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="editor-section">
+                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;">에디터 입력</span>
+                <div id="editor-container"></div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-group">
+                    <h3>이모티콘 빠른 추가</h3>
+                    <div class="flex-row">
+                        <button onclick="appendEmoji('smile', 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png')">😊 :smile:</button>
+                        <button onclick="appendEmoji('heart', 'https://cdn-icons-png.flaticon.com/512/833/833472.png')">❤️ :heart:</button>
+                        <button onclick="appendEmoji('vip-star', 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png')">⭐ :vip-star:</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>허용 그룹 설정 (allowedGroups)</h3>
+                    <div class="flex-row">
+                        <label class="toggle-item">
+                            <input type="checkbox" checked onchange="toggleGroup('basic', this.checked)"> basic (기본)
+                        </label>
+                        <label class="toggle-item">
+                            <input type="checkbox" onchange="toggleGroup('premium', this.checked)"> premium (프리미엄)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>기능 옵션</h3>
+                    <div class="flex-row">
+                        <label class="toggle-item">
+                            <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> 엔터 기능 비활성화 (disableEnter)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>데이터 조작</h3>
+                    <div class="flex-row">
+                        <button onclick="clearEditor()">내용 비우기</button>
+                        <button onclick="setSampleText()">샘플 텍스트 설정</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <span class="label">실시간 텍스트 변환 결과</span>
-        <div id="text-output" class="log"></div>
+        <div class="right-panel">
+            <div class="console-header">
+                <span>EVENT CONSOLE</span>
+                <a href="#" onclick="clearLog(); return false;" style="color: #aaa; text-decoration: none;">Clear</a>
+            </div>
+            <div id="log-list" class="log-list"></div>
+        </div>
     </div>
 
     <script type="module">
         import { EmoticonTextConverter } from './src/index.ts';
 
         const keywordMap = {
-            'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', useLevel: 0 },
-            'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', useLevel: 0 }
+            'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', group: 'basic' },
+            'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', group: 'basic' },
+            'vip-star': { url: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png', group: 'premium' }
         };
 
-        const converter = new EmoticonTextConverter({
+        const config = {
             target: '#editor-container',
             keywordMap,
             emoticonSize: 24,
-            placeholder: '메시지를 입력하세요...'
-        });
+            placeholder: '메시지를 입력하세요...',
+            allowedGroups: { basic: true, premium: false },
+            disableEnter: false,
+            onEnter: (text) => {
+                addLog('onEnter', text);
+            }
+        };
 
+        const converter = new EmoticonTextConverter(config);
         const editor = converter.getElement();
-        const output = document.getElementById('text-output');
 
         editor.addEventListener('input', (e) => {
-            output.textContent = `[INPUT] ${e.detail}`;
-            output.scrollTop = output.scrollHeight;
+            addLog('input', e.detail);
         });
 
+        // Global functions for UI controls
         window.appendEmoji = (key, url) => {
             converter.appendEmoticon({ key, url });
         };
 
         window.clearEditor = () => {
             converter.clear();
+            addLog('action', 'Editor cleared');
         };
+
+        window.setSampleText = () => {
+            const sample = "안녕하세요! :smile: 반갑습니다.\n이것은 엔터가 포함된 :heart: 샘플입니다.";
+            converter.setText(sample);
+            addLog('action', 'Sample text applied');
+        };
+
+        window.toggleGroup = (group, isAllowed) => {
+            config.allowedGroups[group] = isAllowed;
+            converter.setOptions({ allowedGroups: { ...config.allowedGroups } });
+            addLog('config', `Group [${group}] set to ${isAllowed}`);
+        };
+
+        window.toggleOption = (key, value) => {
+            config[key] = value;
+            converter.setOptions({ [key]: value });
+            addLog('config', `Option [${key}] set to ${value}`);
+        };
+
+        // Logging system
+        const logList = document.getElementById('log-list');
+        function addLog(type, msg) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const time = new Date().toLocaleTimeString('ko-KR', { hour12: false });
+            entry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="log-type">${type.toUpperCase()}</span>
+                <span class="log-msg">${msg}</span>
+            `;
+            
+            logList.insertBefore(entry, logList.firstChild);
+        }
+
+        window.clearLog = () => {
+            logList.innerHTML = '';
+        };
+
+        // Initial Log
+        addLog('system', 'Converter initialized');
     </script>
 </body>
 </html>
