@@ -279,7 +279,8 @@
                 <span class="log-msg">${msg}</span>
             `;
             
-            logList.insertBefore(entry, logList.firstChild);
+            logList.appendChild(entry);
+            logList.scrollTop = logList.scrollHeight;
         }
 
         window.clearLog = () => {
