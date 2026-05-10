@@ -215,9 +215,9 @@
         import { EmoticonTextConverter } from './src/index.ts';
 
         const keywordMap = {
-            'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', group: 'basic' },
-            'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', group: 'basic' },
-            'vip-star': { url: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png', group: 'premium' }
+            'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', allowedGroups: ['basic'] },
+            'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', allowedGroups: ['basic'] },
+            'vip-star': { url: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png', allowedGroups: ['premium'] }
         };
 
         const config = {

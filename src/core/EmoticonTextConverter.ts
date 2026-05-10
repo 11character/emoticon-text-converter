@@ -56,6 +56,14 @@ export class EmoticonTextConverter {
       ...this.options,
       ...options
     };
+
+    // 옵션이 변경되면 파서를 재초기화합니다.
+    this.initParser();
+
+    // 에디터가 이미 초기화되어 있다면 내용을 즉시 재변환합니다.
+    if (this.element) {
+      this.convert();
+    }
   }
 
   private initParser(): void {
@@ -208,28 +216,26 @@ export class EmoticonTextConverter {
    * @returns {HTMLImageElement[]}
    */
   private getImgsBeforeCursor(cursorOffset: number): HTMLImageElement[] {
-    const imgs: HTMLImageElement[] = [];
     const { node, nodeOffset } = CursorManager.getLocalOffsetData(this.element, cursorOffset);
+    const range = document.createRange();
     
-    if (node.nodeName.toLowerCase() === 'img' && nodeOffset !== 0) {
-      imgs.push(node as HTMLImageElement);
-    }
-
-    const walker = document.createTreeWalker(
-      this.element,
-      NodeFilter.SHOW_ELEMENT,
-      {
-        acceptNode: (n) => n.nodeName.toLowerCase() === 'img' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    range.setStart(this.element, 0);
+    
+    if (node.nodeType === Node.TEXT_NODE) {
+      range.setEnd(node, nodeOffset);
+    } else {
+      if (nodeOffset === 0) {
+        range.setEndBefore(node);
+      } else {
+        range.setEndAfter(node);
       }
-    );
-
-    let currentNode: Node | null;
-    while ((currentNode = walker.nextNode())) {
-      if (currentNode === node) break;
-      imgs.push(currentNode as HTMLImageElement);
     }
 
-    return imgs;
+    const fragment = range.cloneContents();
+    const temp = document.createElement('div');
+    temp.appendChild(fragment);
+
+    return Array.from(temp.querySelectorAll('img')) as HTMLImageElement[];
   }
 
   /**

@@ -258,5 +258,63 @@ describe('EmoticonTextConverter', () => {
     expect(vipConverter.getText()).toBe('Check :vip:');
     expect(target.innerHTML).not.toContain('img');
   });
+
+  it('should update editor content in real-time when allowedGroups option changes', () => {
+    const groupConverter = new EmoticonTextConverter({
+      target,
+      keywordMap: {
+        vip: { url: 'vip.png', allowedGroups: ['vip'] }
+      },
+      allowedGroups: { 'vip': false }
+    });
+
+    groupConverter.setText('Hello :vip:');
+    expect(target.innerHTML).not.toContain('img');
+    expect(groupConverter.getText()).toBe('Hello :vip:');
+
+    // Enable vip group
+    groupConverter.setOptions({ allowedGroups: { 'vip': true } });
+    expect(target.innerHTML).toContain('img');
+    expect(target.innerHTML).toContain('vip.png');
+    expect(groupConverter.getText()).toBe('Hello :vip:');
+
+    // Disable vip group again
+    groupConverter.setOptions({ allowedGroups: { 'vip': false } });
+    expect(target.innerHTML).not.toContain('img');
+    expect(groupConverter.getText()).toBe('Hello :vip:');
+  });
+
+  it('should maintain the logical cursor position when allowedGroups changes and triggers re-render', () => {
+    const keywordMap: KeywordMap = {
+      vip: { url: 'vip.png', allowedGroups: ['vip'] }
+    };
+    const groupConverter = new EmoticonTextConverter({
+      target,
+      keywordMap,
+      allowedGroups: { 'vip': false }
+    });
+
+    // 1. :vip:가 텍스트인 상태에서 커서를 그 뒤("world"의 앞)에 둠
+    // "Hello :vip: world"
+    // H(1)e(2)l(3)l(4)o(5) (6):(7)v(8)i(9)p(10):(11) (12)w(13)o(14)r(15)l(16)d(17)
+    groupConverter.setText('Hello :vip: world');
+    CursorManager.setCursorPosition(target, 12); // " world" 앞 공백 위치
+    
+    // 2. 그룹 권한 활성화 -> :vip:가 <img>로 변환됨
+    // "Hello [img] world"
+    // H(1)e(2)l(3)l(4)o(5) (6)[img](7) (8)w(9)o(10)r(11)l(12)d(13)
+    // 변환 후의 논리적 커서 위치는 8이어야 함.
+    groupConverter.setOptions({ allowedGroups: { 'vip': true } });
+    
+    expect(target.innerHTML).toContain('img');
+    expect(CursorManager.getCursorPosition(target)).toBe(8);
+
+    // 3. 그룹 권한 다시 비활성화 -> <img>가 다시 :vip: 텍스트로 변환됨
+    // 다시 12로 돌아와야 함.
+    groupConverter.setOptions({ allowedGroups: { 'vip': false } });
+    
+    expect(target.innerHTML).not.toContain('img');
+    expect(CursorManager.getCursorPosition(target)).toBe(12);
+  });
 });
 
