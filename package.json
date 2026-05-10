@@ -1,0 +1,44 @@
+{
+  "name": "emoticon-text-converter",
+  "version": "0.1.0",
+  "description": "A vanilla JavaScript library for converting emoticon keywords to HTML images in contenteditable elements.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^28.0.1",
+    "@types/node": "^25.6.0",
+    "jsdom": "^22.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vite-plugin-dts": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "emoticon",
+    "converter",
+    "contenteditable",
+    "vanilla-js"
+  ],
+  "author": "YOUR_NAME <your.email@example.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

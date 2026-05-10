@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoticon Text Converter Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        #editor-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 100px;
+            margin-bottom: 16px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        #editor-container:focus-within {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #f0f0f0;
+        }
+        .emoticon-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .log {
+            background: #222;
+            color: #0f0;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 100px;
+            overflow-y: auto;
+        }
+        .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Emoticon Text Converter Demo</h1>
+        
+        <span class="label">입력 창 ( :smile: 이나 :heart: 를 입력해보세요)</span>
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+            <button class="emoticon-btn" onclick="appendEmoji('smile', 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png')">
+                <img src="https://cdn-icons-png.flaticon.com/512/1933/1933691.png" width="20" height="20"> :smile: 추가
+            </button>
+            <button class="emoticon-btn" onclick="appendEmoji('heart', 'https://cdn-icons-png.flaticon.com/512/833/833472.png')">
+                <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" width="20" height="20"> :heart: 추가
+            </button>
+            <button onclick="clearEditor()">비우기</button>
+        </div>
+
+        <span class="label">실시간 텍스트 변환 결과</span>
+        <div id="text-output" class="log"></div>
+    </div>
+
+    <script type="module">
+        import { EmoticonTextConverter } from './src/index.ts';
+
+        const keywordMap = {
+            'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', useLevel: 0 },
+            'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', useLevel: 0 }
+        };
+
+        const converter = new EmoticonTextConverter({
+            target: '#editor-container',
+            keywordMap,
+            emoticonSize: 24,
+            placeholder: '메시지를 입력하세요...'
+        });
+
+        const editor = converter.getElement();
+        const output = document.getElementById('text-output');
+
+        editor.addEventListener('input', (e) => {
+            output.textContent = `[INPUT] ${e.detail}`;
+            output.scrollTop = output.scrollHeight;
+        });
+
+        window.appendEmoji = (key, url) => {
+            converter.appendEmoticon({ key, url });
+        };
+
+        window.clearEditor = () => {
+            converter.clear();
+        };
+    </script>
+</body>
+</html>
