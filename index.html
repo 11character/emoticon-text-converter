@@ -144,6 +144,7 @@
             padding-bottom: 4px;
         }
         .log-time { color: #888; margin-right: 8px; }
+        .log-meta { color: #888; }
         .log-type { color: #4ec9b0; font-weight: bold; margin-right: 8px; }
         .log-msg { color: #ce9178; word-break: break-all; }
     </style>
@@ -232,9 +233,15 @@
             onInput: (text) => {
                 requestAnimationFrame(() => {
                     const currentPos = converter.getCursorPosition();
-                    addLog('onInput', `[${prevCursorPos} -> ${currentPos}] Text: "${text}"`);
-                    console.log(`[Cursor Change] Prev: ${prevCursorPos}, Current: ${currentPos}, Text: "${text}"`);
+                    const currentLen = converter.getConvertedTextLength();
+                    
+                    const meta = `<span class="log-meta">[Len: ${prevTextLen} -> ${currentLen}] [Pos: ${prevCursorPos} -> ${currentPos}]</span>`;
+                    addLog('onInput', `${meta} Text: "${text}"`);
+                    
+                    console.log(`[Input Change] Len: ${prevTextLen}->${currentLen}, Pos: ${prevCursorPos}->${currentPos}, Text: "${text}"`);
+                    
                     prevCursorPos = currentPos;
+                    prevTextLen = currentLen;
                 });
             },
             onFocus: () => {
@@ -249,13 +256,15 @@
         const editor = converter.getElement();
 
         let prevCursorPos = 0;
+        let prevTextLen = 0;
 
-        // 커서 위치 동기화를 위해 클릭이나 키업 시에도 이전 위치를 업데이트합니다.
-        const updatePrevPos = () => {
+        // 커서 위치 및 길이 동기화를 위해 클릭이나 키업 시에도 이전 값을 업데이트합니다.
+        const updatePrevStats = () => {
             prevCursorPos = converter.getCursorPosition();
+            prevTextLen = converter.getConvertedTextLength();
         };
-        editor.addEventListener('click', updatePrevPos);
-        editor.addEventListener('keyup', updatePrevPos);
+        editor.addEventListener('click', updatePrevStats);
+        editor.addEventListener('keyup', updatePrevStats);
 
         // Global functions for UI controls
         window.appendEmoji = (key, url) => {

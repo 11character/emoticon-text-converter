@@ -40,6 +40,26 @@ describe('EmoticonTextConverter', () => {
     expect(target.innerHTML).toBe('');
   });
 
+  it('should return correct original and converted text lengths', () => {
+    // 1. Plain text
+    converter.setText('hello');
+    expect(converter.getOriginalTextLength()).toBe(5);
+    expect(converter.getConvertedTextLength()).toBe(5);
+
+    // 2. With emoticons
+    converter.setText('a:smile:b');
+    // Original: a:smile:b (9 chars)
+    // Converted: a(1) + img(1) + b(1) = 3 chars
+    expect(converter.getOriginalTextLength()).toBe(9);
+    expect(converter.getConvertedTextLength()).toBe(3);
+
+    // 3. With unallowed emoticon group
+    // vip-star is not in keywordMap in beforeEach, so it's just text
+    converter.setText(':vip-star:');
+    expect(converter.getOriginalTextLength()).toBe(10);
+    expect(converter.getConvertedTextLength()).toBe(10);
+  });
+
   it('should insert text at cursor position (default at start if no selection)', () => {
     converter.setText('World');
     converter.insertText('Hello ');

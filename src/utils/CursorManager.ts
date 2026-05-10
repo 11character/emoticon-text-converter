@@ -13,31 +13,31 @@ export class CursorManager {
 
     const range = selection.getRangeAt(0);
     const startNode = range.startContainer;
-    const startOffset = range.startOffset;
 
-    let offset = 0;
+    // 선택 범위가 root 내부에 없는 경우 0 반환
+    if (!root.contains(startNode) && root !== startNode) return 0;
 
-    // 1. root 자체가 선택된 경우 (자식 노드가 없는 상태 등)
-    if (startNode === root && startNode.nodeType !== Node.TEXT_NODE) {
-      const nodeArray = Array.from(root.childNodes);
-      const previousNodes = nodeArray.slice(0, startOffset);
+    // root의 시작점부터 현재 커서 위치까지의 범위를 생성하여 논리적 길이를 계산
+    const preRange = range.cloneRange();
+    preRange.selectNodeContents(root);
+    preRange.setEnd(range.startContainer, range.startOffset);
 
-      return previousNodes.reduce((acc, node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          return acc + ((node as Text).nodeValue?.length || 0);
-        } else if (
-          node.nodeName.toLowerCase() === 'img' ||
-          node.nodeName.toLowerCase() === 'br'
-        ) {
-          return acc + 1;
-        }
-        return acc;
-      }, 0);
-    }
+    const fragment = preRange.cloneContents();
+    const tempContainer = document.createElement('div');
+    tempContainer.appendChild(fragment);
 
-    // 2. TreeWalker를 사용한 순회 탐색
+    return this.getLogicalLength(tempContainer);
+  }
+
+  /**
+   * 요소 내의 논리적 텍스트 길이를 계산합니다. (img, br은 1글자로 취급)
+   * @param {HTMLElement} element 
+   * @returns {number}
+   */
+  static getLogicalLength(element: HTMLElement): number {
+    let length = 0;
     const walker = document.createTreeWalker(
-      root,
+      element,
       NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
       {
         acceptNode: (node) => {
@@ -52,22 +52,14 @@ export class CursorManager {
 
     let currentNode: Node | null;
     while ((currentNode = walker.nextNode())) {
-      if (currentNode === startNode) {
-        offset += startOffset;
-        break;
-      }
-
       if (currentNode.nodeType === Node.TEXT_NODE) {
-        offset += (currentNode as Text).nodeValue?.length || 0;
-      } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
-        const tagName = currentNode.nodeName.toLowerCase();
-        if (tagName === 'img' || tagName === 'br') {
-          offset += 1;
-        }
+        length += (currentNode as Text).nodeValue?.length || 0;
+      } else {
+        // img 또는 br
+        length += 1;
       }
     }
-
-    return offset;
+    return length;
   }
 
   /**

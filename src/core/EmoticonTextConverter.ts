@@ -128,6 +128,22 @@ export class EmoticonTextConverter {
   }
 
   /**
+   * 원본 텍스트의 길이를 반환합니다. (:keyword: 포함)
+   * @returns {number}
+   */
+  public getOriginalTextLength(): number {
+    return this.getText().length;
+  }
+
+  /**
+   * 변환 후의 논리적 텍스트 길이를 반환합니다. (이모티콘 1글자 취급)
+   * @returns {number}
+   */
+  public getConvertedTextLength(): number {
+    return CursorManager.getLogicalLength(this.element);
+  }
+
+  /**
    * 현재 커서의 논리적 위치를 반환합니다.
    * @returns {number}
    */
@@ -155,11 +171,14 @@ export class EmoticonTextConverter {
     const endText = text.slice(textIndex);
 
     const newText = `${startText}${str}${endText}`;
-    this.setText(newText);
-
-    setTimeout(() => {
-      CursorManager.setCursorPosition(this.element, cursorOffset + str.length);
-    }, 0);
+    
+    this.state.text = newText;
+    this.element.innerHTML = this.parser.toHtml(newText);
+    
+    // Selection 복구를 onInput 호출 전으로 변경 (동기식)
+    CursorManager.setCursorPosition(this.element, cursorOffset + str.length);
+    
+    this.options.onInput?.(newText);
   }
 
   /**
@@ -293,11 +312,14 @@ export class EmoticonTextConverter {
     const text = this.getText();
 
     this.element.innerHTML = this.parser.toHtml(text);
-
-    setTimeout(() => {
-      CursorManager.setCursorPosition(this.element, cursorOffset);
-      this.state.isConverting = false;
-    }, 0);
+    
+    // Selection 복구를 동기식으로 수행
+    CursorManager.setCursorPosition(this.element, cursorOffset);
+    
+    this.state.isConverting = false;
+    
+    // 변환 후에도 텍스트가 바뀐 것으로 간주하여 onInput 호출 (선택 사항이나 데모 정합성을 위해 추가)
+    this.options.onInput?.(text);
   }
 
   private insertLineBreak(): void {
