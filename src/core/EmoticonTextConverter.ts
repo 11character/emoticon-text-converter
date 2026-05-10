@@ -152,20 +152,40 @@ export class EmoticonTextConverter {
   }
 
   /**
-   * 커서 위치에 텍스트를 삽입합니다.
-   * @param {string} str 
+   * 논리적 커서 위치를 바탕으로 원본 텍스트(keyword 포함)에서의 인덱스를 계산합니다.
+   * @param {number} logicalOffset 
+   * @returns {number}
    */
-  public insertText(str: string): void {
-    const cursorOffset = CursorManager.getCursorPosition(this.element);
-    const text = this.getText();
-
-    const imgsBefore = this.getImgsBeforeCursor(cursorOffset);
+  private getOriginalTextIndex(logicalOffset: number): number {
+    const imgsBefore = this.getImgsBeforeCursor(logicalOffset);
     const correction = imgsBefore.reduce((acc, img) => {
       const alt = img.getAttribute('alt') || '';
       return acc + (alt.length - 1);
     }, 0);
 
-    const textIndex = cursorOffset + correction;
+    return logicalOffset + correction;
+  }
+
+  /**
+   * 특정 텍스트를 변환했을 때 예상되는 논리적 길이를 반환합니다.
+   * @param {string} text 
+   * @returns {number}
+   */
+  private getExpectedLogicalLength(text: string): number {
+    const html = this.parser.toHtml(text);
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    return CursorManager.getLogicalLength(temp);
+  }
+
+  /**
+   * 커서 위치에 텍스트를 삽입합니다.
+   */
+  public insertText(str: string): void {
+    const cursorOffset = CursorManager.getCursorPosition(this.element);
+    const text = this.getText();
+
+    const textIndex = this.getOriginalTextIndex(cursorOffset);
 
     const startText = text.slice(0, textIndex);
     const endText = text.slice(textIndex);
@@ -175,8 +195,9 @@ export class EmoticonTextConverter {
     this.state.text = newText;
     this.element.innerHTML = this.parser.toHtml(newText);
     
-    // Selection 복구를 onInput 호출 전으로 변경 (동기식)
-    CursorManager.setCursorPosition(this.element, cursorOffset + str.length);
+    // 삽입된 문자열을 포함한 앞부분의 새로운 논리적 위치 계산
+    const newPos = this.getExpectedLogicalLength(startText + str);
+    CursorManager.setCursorPosition(this.element, newPos);
     
     this.options.onInput?.(newText);
   }
@@ -311,14 +332,17 @@ export class EmoticonTextConverter {
     const cursorOffset = CursorManager.getCursorPosition(this.element);
     const text = this.getText();
 
+    // 변환 전 커서 앞부분의 텍스트를 추출하여 변환 후의 논리적 위치를 미리 계산
+    const textIndex = this.getOriginalTextIndex(cursorOffset);
+    const textBefore = text.slice(0, textIndex);
+    const newPos = this.getExpectedLogicalLength(textBefore);
+
     this.element.innerHTML = this.parser.toHtml(text);
     
-    // Selection 복구를 동기식으로 수행
-    CursorManager.setCursorPosition(this.element, cursorOffset);
+    // 보정된 위치로 커서 복구
+    CursorManager.setCursorPosition(this.element, newPos);
     
     this.state.isConverting = false;
-    
-    // 변환 후에도 텍스트가 바뀐 것으로 간주하여 onInput 호출 (선택 사항이나 데모 정합성을 위해 추가)
     this.options.onInput?.(text);
   }
 
