@@ -62,22 +62,22 @@ describe('EmoticonTextConverter', () => {
     expect(converter.getText()).toBe('I love :heart:');
   });
 
-  it('should dispatch input event when text is set', () => {
-    const spy = vi.fn();
-    target.addEventListener('input', spy);
-    converter.setText('New text');
-    expect(spy).toHaveBeenCalled();
-    const event = spy.mock.calls[0][0] as CustomEvent;
-    expect(event.detail).toBe('New text');
+  it('should call onInput callback when text is set', () => {
+    const onInputSpy = vi.fn();
+    const inputConverter = new EmoticonTextConverter({
+      target,
+      onInput: onInputSpy
+    });
+    inputConverter.setText('New text');
+    expect(onInputSpy).toHaveBeenCalledWith('New text');
   });
 
   it('should trigger conversion when ":" is typed', async () => {
     converter.setText('Type ');
     CursorManager.setCursorPosition(target, 5);
     
-    const event = new KeyboardEvent('keyup', { key: ':' });
     target.innerHTML += ':';
-    target.dispatchEvent(event);
+    target.dispatchEvent(new KeyboardEvent('keyup', { key: ':' }));
 
     await new Promise(resolve => setTimeout(resolve, 20));
     
@@ -88,28 +88,35 @@ describe('EmoticonTextConverter', () => {
     expect(target.innerHTML).toContain('img');
   });
 
-  it('should dispatch enter event on Enter key', () => {
-    const spy = vi.fn();
-    target.addEventListener('enter', spy);
-    
-    converter.setText('Command');
-    target.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
-    
-    expect(spy).toHaveBeenCalled();
-    const event = spy.mock.calls[0][0] as CustomEvent;
-    expect(event.detail).toBe('Command');
-  });
-
-  it('should call onEnter option when enter event is dispatched', () => {
+  it('should call onEnter option when Enter key is pressed', () => {
     const onEnterSpy = vi.fn();
     const enterConverter = new EmoticonTextConverter({
       target,
       onEnter: onEnterSpy
     });
 
-    enterConverter.setText('Test onEnter');
+    enterConverter.setText('Command');
     target.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
-    expect(onEnterSpy).toHaveBeenCalledWith('Test onEnter');
+    
+    expect(onEnterSpy).toHaveBeenCalledWith('Command');
+  });
+
+  it('should be able to remove a callback by setting it to null', () => {
+    const onInputSpy = vi.fn();
+    const inputConverter = new EmoticonTextConverter({
+      target,
+      onInput: onInputSpy
+    });
+
+    inputConverter.setText('First');
+    expect(onInputSpy).toHaveBeenCalledTimes(1);
+
+    // Remove callback
+    inputConverter.setOptions({ onInput: null as any });
+    inputConverter.setText('Second');
+    
+    // Should still be 1, not 2
+    expect(onInputSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should respect disableEnter option', () => {

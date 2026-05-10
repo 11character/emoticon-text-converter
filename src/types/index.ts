@@ -17,6 +17,9 @@ export interface EmoticonTextConverterOptions extends TextParserOptions {
   target?: string | HTMLElement | null;
   placeholder?: string;
   onEnter?: (text: string) => void;
+  onInput?: (text: string) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   disableEnter?: boolean;
 }
 
@@ -34,6 +37,6 @@ export interface EmoticonConverterState {
 
 declare global {
   interface Event {
-    _isETC?: boolean;
+    // _isETC 플래그는 더 이상 사용되지 않습니다 (콜백 방식으로 전환)
   }
 }

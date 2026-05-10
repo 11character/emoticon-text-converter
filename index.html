@@ -228,15 +228,34 @@
             disableEnter: false,
             onEnter: (text) => {
                 addLog('onEnter', text);
+            },
+            onInput: (text) => {
+                requestAnimationFrame(() => {
+                    const currentPos = converter.getCursorPosition();
+                    addLog('onInput', `[${prevCursorPos} -> ${currentPos}] Text: "${text}"`);
+                    console.log(`[Cursor Change] Prev: ${prevCursorPos}, Current: ${currentPos}, Text: "${text}"`);
+                    prevCursorPos = currentPos;
+                });
+            },
+            onFocus: () => {
+                addLog('onFocus', 'Editor focused');
+            },
+            onBlur: () => {
+                addLog('onBlur', 'Editor blurred');
             }
         };
 
         const converter = new EmoticonTextConverter(config);
         const editor = converter.getElement();
 
-        editor.addEventListener('input', (e) => {
-            addLog('input', e.detail);
-        });
+        let prevCursorPos = 0;
+
+        // 커서 위치 동기화를 위해 클릭이나 키업 시에도 이전 위치를 업데이트합니다.
+        const updatePrevPos = () => {
+            prevCursorPos = converter.getCursorPosition();
+        };
+        editor.addEventListener('click', updatePrevPos);
+        editor.addEventListener('keyup', updatePrevPos);
 
         // Global functions for UI controls
         window.appendEmoji = (key, url) => {

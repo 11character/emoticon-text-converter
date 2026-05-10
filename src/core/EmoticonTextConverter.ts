@@ -12,13 +12,16 @@ export class EmoticonTextConverter {
   private element!: HTMLElement;
   private parser!: TextParser;
 
-  private options: Required<EmoticonTextConverterOptions> = {
+  private options: EmoticonTextConverterOptions = {
     target: null,
     keywordMap: {},
     emoticonSize: 28,
     userEmoticonLevel: 0,
     placeholder: '',
     onEnter: () => {},
+    onInput: () => {},
+    onFocus: () => {},
+    onBlur: () => {},
     disableEnter: false,
   };
 
@@ -112,7 +115,7 @@ export class EmoticonTextConverter {
   public setText(text: string): void {
     this.state.text = text;
     this.element.innerHTML = this.parser.toHtml(text);
-    this.dispatch('input', text);
+    this.options.onInput?.(text);
   }
 
   /**
@@ -121,7 +124,15 @@ export class EmoticonTextConverter {
   public clear(): void {
     this.element.innerHTML = '';
     this.state.text = '';
-    this.dispatch('input', '');
+    this.options.onInput?.('');
+  }
+
+  /**
+   * 현재 커서의 논리적 위치를 반환합니다.
+   * @returns {number}
+   */
+  public getCursorPosition(): number {
+    return CursorManager.getCursorPosition(this.element);
   }
 
   /**
@@ -190,53 +201,30 @@ export class EmoticonTextConverter {
   }
 
   /**
-   * 이벤트를 발생시킵니다.
-   * @param {string} type 
-   * @param {any} detail 
-   */
-  private dispatch(type: string, detail: any = null): void {
-    const event = new CustomEvent(type, { detail }) as any;
-    event._isETC = true;
-    this.element.dispatchEvent(event);
-
-    // 엔터 이벤트인 경우 onEnter 콜백을 실행합니다.
-    if (type === 'enter' && this.options.onEnter) {
-      this.options.onEnter(detail);
-    }
-  }
-
-  /**
    * 이벤트 리스너를 바인딩합니다.
    */
   private bindEvents(): void {
     const el = this.element;
 
-    el.addEventListener('keydown', (e: Event) => {
-      if (e._isETC) return;
-      this.onKeyDown(e as KeyboardEvent);
+    el.addEventListener('keydown', (e: KeyboardEvent) => {
+      this.onKeyDown(e);
     });
-    el.addEventListener('keyup', (e: Event) => {
-      if (e._isETC) return;
-      this.onKeyUp(e as KeyboardEvent);
+    el.addEventListener('keyup', (e: KeyboardEvent) => {
+      this.onKeyUp(e);
     });
     el.addEventListener('input', (e: Event) => {
-      if (e._isETC) return;
       this.onInput(e);
     });
-    el.addEventListener('paste', (e: Event) => {
-      if (e._isETC) return;
-      this.onPaste(e as ClipboardEvent);
+    el.addEventListener('paste', (e: ClipboardEvent) => {
+      this.onPaste(e);
     });
-    el.addEventListener('focus', (e: Event) => {
-      if (e._isETC) return;
-      this.dispatch('focus');
+    el.addEventListener('focus', () => {
+      this.options.onFocus?.();
     });
-    el.addEventListener('blur', (e: Event) => {
-      if (e._isETC) return;
-      this.dispatch('blur');
+    el.addEventListener('blur', () => {
+      this.options.onBlur?.();
     });
-    el.addEventListener('compositionend', (e: Event) => {
-      if (e._isETC) return;
+    el.addEventListener('compositionend', () => {
       this.state.isComposition = true;
     });
   }
@@ -277,7 +265,7 @@ export class EmoticonTextConverter {
     if (key === 'Enter') {
       if (!this.state.isImeInput && !this.state.isDownCtrl && !this.state.isDownAlt && !this.state.isDownMeta) {
         if (!this.state.isDownShift && !this.state.isComposition) {
-          this.dispatch('enter', text);
+          this.options.onEnter?.(text);
         }
       }
     }
@@ -288,7 +276,7 @@ export class EmoticonTextConverter {
 
   private onInput(e: Event): void {
     this.state.text = this.getText();
-    this.dispatch('input', this.state.text);
+    this.options.onInput?.(this.state.text);
   }
 
   private onPaste(e: ClipboardEvent): void {
@@ -334,7 +322,7 @@ export class EmoticonTextConverter {
     selection.addRange(range);
 
     this.state.text = this.getText();
-    this.dispatch('input', this.state.text);
+    this.options.onInput?.(this.state.text);
   }
 
   private updateStateFromEvent(e: KeyboardEvent): void {
