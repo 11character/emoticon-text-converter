@@ -6,8 +6,8 @@ describe('TextParser', () => {
   let parser: TextParser;
   const mockKeywordMap: KeywordMap = {
     'smile': { url: 'smile.png' }, // No allowedGroups means public
-    'heart': { url: 'heart.png', allowedGroups: ['vip', 'admin'] },
-    'star': { url: 'star.png', allowedGroups: ['admin'] }
+    'heart': { url: 'heart.png', groups: ['vip', 'admin'] },
+    'star': { url: 'star.png', groups: ['admin'] }
   };
 
   beforeEach(() => {

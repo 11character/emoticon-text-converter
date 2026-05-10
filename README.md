@@ -35,8 +35,8 @@ import { EmoticonTextConverter, KeywordMap } from 'emoticon-text-converter';
 
 // 1. 키워드 맵 정의 (url 및 접근 가능한 그룹 설정)
 const keywordMap: KeywordMap = {
-    'smile': { url: 'https://example.com/smile.png', allowedGroups: ['free', 'premium'] },
-    'heart': { url: 'https://example.com/heart.png', allowedGroups: ['premium'] }
+    'smile': { url: 'https://example.com/smile.png', groups: ['free', 'premium'] },
+    'heart': { url: 'https://example.com/heart.png', groups: ['premium'] }
 };
 
 // 2. 컨버터 인스턴스 생성

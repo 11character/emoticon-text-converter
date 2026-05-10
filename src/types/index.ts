@@ -1,6 +1,6 @@
 export interface EmoticonItem {
   url: string;
-  allowedGroups?: string[];
+  groups?: string[];
 }
 
 export interface KeywordMap {

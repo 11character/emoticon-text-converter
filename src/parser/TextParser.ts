@@ -40,9 +40,9 @@ export class TextParser {
     splitArr.forEach((key) => {
       const emoticon = this.keywordMap[key];
       if (emoticon) {
-        // 권한 체크: allowedGroups가 없으면 전체 공개, 있으면 해당 그룹 포함 여부 확인
-        const isAllowed = !emoticon.allowedGroups || 
-                         emoticon.allowedGroups.some(group => this.allowedGroups[group]);
+        // 권한 체크: groups가 없으면 전체 공개, 있으면 해당 그룹 포함 여부 확인
+        const isAllowed = !emoticon.groups || 
+                         emoticon.groups.some(group => this.allowedGroups[group]);
         
         if (isAllowed) {
           matchKeySet.add(key);

@@ -9,7 +9,7 @@ describe('EmoticonTextConverter', () => {
   const keywordMap: KeywordMap = {
     smile: { url: 'smile.png' },
     heart: { url: 'heart.png' },
-    star: { url: 'star.png', allowedGroups: ['vip'] }
+    star: { url: 'star.png', groups: ['vip'] }
   };
 
   beforeEach(() => {
@@ -250,7 +250,7 @@ describe('EmoticonTextConverter', () => {
     const vipConverter = new EmoticonTextConverter({
       target,
       keywordMap: {
-        vip: { url: 'vip.png', allowedGroups: ['vip'] }
+        vip: { url: 'vip.png', groups: ['vip'] }
       },
       allowedGroups: { 'vip': false }
     });
@@ -263,7 +263,7 @@ describe('EmoticonTextConverter', () => {
     const groupConverter = new EmoticonTextConverter({
       target,
       keywordMap: {
-        vip: { url: 'vip.png', allowedGroups: ['vip'] }
+        vip: { url: 'vip.png', groups: ['vip'] }
       },
       allowedGroups: { 'vip': false }
     });
@@ -286,7 +286,7 @@ describe('EmoticonTextConverter', () => {
 
   it('should maintain the logical cursor position when allowedGroups changes and triggers re-render', () => {
     const keywordMap: KeywordMap = {
-      vip: { url: 'vip.png', allowedGroups: ['vip'] }
+      vip: { url: 'vip.png', groups: ['vip'] }
     };
     const groupConverter = new EmoticonTextConverter({
       target,
