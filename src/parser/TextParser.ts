@@ -26,9 +26,7 @@ export class TextParser {
     if (!text) return '';
 
     // 1. 특수문자 엔티티화 (XSS 방지 및 텍스트 보존)
-    const tempDiv = document.createElement('div');
-    tempDiv.textContent = text;
-    let html = tempDiv.innerHTML;
+    let html = this.escapeHtml(text);
 
     // 2. 줄바꿈을 <br>로 변환
     html = html.replace(/\r?\n/g, '<br>');
@@ -51,10 +49,13 @@ export class TextParser {
     });
 
     matchKeySet.forEach((key) => {
-      const escapedKey = key.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+      const htmlKey = this.escapeHtml(key);
+      const escapedKey = htmlKey.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
       const emoticon = this.keywordMap[key];
       if (emoticon) {
-        const imgHtml = `<img src="${emoticon.url}" style="display:inline; pointer-events: none;" width="${this.emoticonSize}" height="${this.emoticonSize}" alt=":${key}:" />`;
+        const safeUrl = this.escapeAttribute(emoticon.url);
+        const safeKey = this.escapeAttribute(key);
+        const imgHtml = `<img src="${safeUrl}" style="display:inline; pointer-events: none;" width="${this.emoticonSize}" height="${this.emoticonSize}" alt=":${safeKey}:" />`;
         
         // 전역 매칭을 통해 모든 인스턴스 교체
         html = html.replace(new RegExp(`:${escapedKey}:`, 'gi'), imgHtml);
@@ -62,6 +63,24 @@ export class TextParser {
     });
 
     return html;
+  }
+
+  /**
+   * 텍스트를 HTML 엔티티로 변환합니다.
+   */
+  private escapeHtml(str: string): string {
+    if (!str) return '';
+    const tempDiv = document.createElement('div');
+    tempDiv.textContent = str;
+    return tempDiv.innerHTML;
+  }
+
+  /**
+   * HTML 속성 값 내의 큰따옴표를 이스케이프합니다.
+   */
+  private escapeAttribute(str: string): string {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;');
   }
 
   /**

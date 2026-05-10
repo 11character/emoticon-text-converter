@@ -290,6 +290,9 @@ export class EmoticonTextConverter {
     el.addEventListener('paste', (e: ClipboardEvent) => {
       this.onPaste(e);
     });
+    el.addEventListener('drop', (e: DragEvent) => {
+      this.onDrop(e);
+    });
     el.addEventListener('focus', () => {
       this.options.onFocus?.();
     });
@@ -356,6 +359,14 @@ export class EmoticonTextConverter {
     const pastedText = e.clipboardData?.getData('text/plain');
     if (pastedText) {
       this.insertText(pastedText);
+    }
+  }
+
+  private onDrop(e: DragEvent): void {
+    e.preventDefault();
+    const droppedText = e.dataTransfer?.getData('text/plain');
+    if (droppedText) {
+      this.insertText(droppedText);
     }
   }
 

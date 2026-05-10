@@ -211,6 +211,25 @@ describe('EmoticonTextConverter', () => {
     expect(target.innerHTML).toContain('<br>');
   });
 
+  it('should handle drop event by inserting only plain text', () => {
+    const dataTransfer = {
+      getData: (type: string) => {
+        if (type === 'text/plain') return 'Dropped Text';
+        if (type === 'text/html') return '<img src="x" onerror="alert(1)">';
+        return '';
+      },
+    };
+    const event = new CustomEvent('drop', { bubbles: true, cancelable: true }) as any;
+    event.dataTransfer = dataTransfer;
+    event.preventDefault = vi.fn();
+    
+    target.dispatchEvent(event);
+    
+    expect(converter.getText()).toBe('Dropped Text');
+    expect(target.innerHTML).not.toContain('img');
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
   it('should handle emoticons at the very beginning and end', () => {
     converter.setText(':smile:text:heart:');
     expect(converter.getText()).toBe(':smile:text:heart:');

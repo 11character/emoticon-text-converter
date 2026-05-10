@@ -97,4 +97,24 @@ describe('TextParser', () => {
       expect(parser.toText(container)).toBe('Parent Child');
     });
   });
+
+  describe('Security', () => {
+    it('이모티콘 URL이나 키워드에 큰따옴표가 포함되어도 속성이 주입되지 않아야 한다', () => {
+      const maliciousParser = new TextParser({
+        keywordMap: {
+          'evil" onerror="alert(1)': {
+            url: 'x" onerror="alert(2)'
+          }
+        }
+      });
+      
+      const html = maliciousParser.toHtml(':evil" onerror="alert(1):');
+      
+      // 속성 주입 방지를 위해 &quot;로 이스케이프되어야 함
+      expect(html).toContain('src="x&quot; onerror=&quot;alert(2)"');
+      expect(html).toContain('alt=":evil&quot; onerror=&quot;alert(1):"');
+      expect(html).not.toContain('onerror="alert(1)"');
+      expect(html).not.toContain('onerror="alert(2)"');
+    });
+  });
 });
