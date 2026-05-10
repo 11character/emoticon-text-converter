@@ -6,7 +6,7 @@ import { KeywordMap, TextParserOptions } from '../types';
 export class TextParser {
   private keywordMap: KeywordMap;
   private emoticonSize: number;
-  private userEmoticonLevel: number;
+  private allowedGroups: Record<string, boolean>;
 
   /**
    * @param {TextParserOptions} options
@@ -14,7 +14,7 @@ export class TextParser {
   constructor(options: TextParserOptions = {}) {
     this.keywordMap = options.keywordMap || {};
     this.emoticonSize = options.emoticonSize || 28;
-    this.userEmoticonLevel = options.userEmoticonLevel || 0;
+    this.allowedGroups = options.allowedGroups || {};
   }
 
   /**
@@ -39,8 +39,14 @@ export class TextParser {
 
     splitArr.forEach((key) => {
       const emoticon = this.keywordMap[key];
-      if (emoticon && (emoticon.useLevel || 0) <= this.userEmoticonLevel) {
-        matchKeySet.add(key);
+      if (emoticon) {
+        // 권한 체크: allowedGroups가 없으면 전체 공개, 있으면 해당 그룹 포함 여부 확인
+        const isAllowed = !emoticon.allowedGroups || 
+                         emoticon.allowedGroups.some(group => this.allowedGroups[group]);
+        
+        if (isAllowed) {
+          matchKeySet.add(key);
+        }
       }
     });
 

@@ -5,16 +5,16 @@ import { KeywordMap } from '../types';
 describe('TextParser', () => {
   let parser: TextParser;
   const mockKeywordMap: KeywordMap = {
-    'smile': { url: 'smile.png', useLevel: 0 },
-    'heart': { url: 'heart.png', useLevel: 1 },
-    'star': { url: 'star.png', useLevel: 5 }
+    'smile': { url: 'smile.png' }, // No allowedGroups means public
+    'heart': { url: 'heart.png', allowedGroups: ['vip', 'admin'] },
+    'star': { url: 'star.png', allowedGroups: ['admin'] }
   };
 
   beforeEach(() => {
     parser = new TextParser({
       keywordMap: mockKeywordMap,
       emoticonSize: 30,
-      userEmoticonLevel: 1
+      allowedGroups: { 'vip': true }
     });
   });
 
@@ -41,6 +41,23 @@ describe('TextParser', () => {
     it('권한이 없는 이모티콘 키워드는 변환하지 않아야 한다', () => {
       const input = 'Check this :star:';
       expect(parser.toHtml(input)).toBe('Check this :star:');
+    });
+
+    it('이모티콘 사용 권한을 그룹 단위로 제어해야 한다', () => {
+      const adminParser = new TextParser({
+        keywordMap: mockKeywordMap,
+        allowedGroups: { 'admin': true }
+      });
+      
+      expect(adminParser.toHtml('Admin :star:')).toContain('star.png');
+      expect(adminParser.toHtml('Admin :heart:')).toContain('heart.png');
+      
+      const guestParser = new TextParser({
+        keywordMap: mockKeywordMap,
+        allowedGroups: {}
+      });
+      expect(guestParser.toHtml('Guest :heart:')).toBe('Guest :heart:');
+      expect(guestParser.toHtml('Guest :smile:')).toContain('smile.png');
     });
 
     it('존재하지 않는 키워드는 변환하지 않아야 한다', () => {

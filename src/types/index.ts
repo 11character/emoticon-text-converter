@@ -1,6 +1,6 @@
 export interface EmoticonItem {
   url: string;
-  useLevel?: number;
+  allowedGroups?: string[];
 }
 
 export interface KeywordMap {
@@ -10,7 +10,7 @@ export interface KeywordMap {
 export interface TextParserOptions {
   keywordMap?: KeywordMap;
   emoticonSize?: number;
-  userEmoticonLevel?: number;
+  allowedGroups?: Record<string, boolean>;
 }
 
 export interface EmoticonTextConverterOptions extends TextParserOptions {

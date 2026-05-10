@@ -16,7 +16,7 @@ export class EmoticonTextConverter {
     target: null,
     keywordMap: {},
     emoticonSize: 28,
-    userEmoticonLevel: 0,
+    allowedGroups: {},
     placeholder: '',
     onEnter: () => {},
     onInput: () => {},
@@ -62,7 +62,7 @@ export class EmoticonTextConverter {
     this.parser = new TextParser({
       keywordMap: this.options.keywordMap,
       emoticonSize: this.options.emoticonSize,
-      userEmoticonLevel: this.options.userEmoticonLevel,
+      allowedGroups: this.options.allowedGroups
     });
   }
 

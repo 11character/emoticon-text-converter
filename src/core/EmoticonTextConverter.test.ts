@@ -7,8 +7,9 @@ describe('EmoticonTextConverter', () => {
   let converter: EmoticonTextConverter;
   let target: HTMLElement;
   const keywordMap: KeywordMap = {
-    smile: { url: 'smile.png', useLevel: 0 },
-    heart: { url: 'heart.png', useLevel: 0 },
+    smile: { url: 'smile.png' },
+    heart: { url: 'heart.png' },
+    star: { url: 'star.png', allowedGroups: ['vip'] }
   };
 
   beforeEach(() => {
@@ -18,6 +19,7 @@ describe('EmoticonTextConverter', () => {
       target,
       keywordMap,
       emoticonSize: 20,
+      allowedGroups: { 'vip': false }
     });
   });
 
@@ -54,10 +56,10 @@ describe('EmoticonTextConverter', () => {
     expect(converter.getConvertedTextLength()).toBe(3);
 
     // 3. With unallowed emoticon group
-    // vip-star is not in keywordMap in beforeEach, so it's just text
-    converter.setText(':vip-star:');
-    expect(converter.getOriginalTextLength()).toBe(10);
-    expect(converter.getConvertedTextLength()).toBe(10);
+    // star is in keywordMap but allowedGroups: { 'vip': false } in beforeEach
+    converter.setText(':star:');
+    expect(converter.getOriginalTextLength()).toBe(6);
+    expect(converter.getConvertedTextLength()).toBe(6);
   });
 
   it('should insert text at cursor position (default at start if no selection)', () => {
@@ -244,15 +246,17 @@ describe('EmoticonTextConverter', () => {
     // Let's at least check if compositionend event is handled.
   });
 
-  it('should not convert emoticons if level is higher than user level', () => {
+  it('should not convert emoticons if group is not allowed', () => {
     const vipConverter = new EmoticonTextConverter({
-        target,
-        keywordMap: { vip: { url: 'vip.png', useLevel: 10 } },
-        userEmoticonLevel: 0
+      target,
+      keywordMap: {
+        vip: { url: 'vip.png', allowedGroups: ['vip'] }
+      },
+      allowedGroups: { 'vip': false }
     });
-    
     vipConverter.setText('Check :vip:');
     expect(vipConverter.getText()).toBe('Check :vip:');
     expect(target.innerHTML).not.toContain('img');
   });
 });
+
