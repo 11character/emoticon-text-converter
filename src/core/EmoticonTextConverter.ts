@@ -239,6 +239,40 @@ export class EmoticonTextConverter {
   }
 
   /**
+   * 현재 설정된 이모티콘 맵 객체를 반환합니다.
+   * @returns {KeywordMap}
+   */
+  public getKeywordMap(): import('../types').KeywordMap {
+    return this.options.keywordMap || {};
+  }
+
+  /**
+   * 새로운 이모티콘 키워드를 맵에 추가하거나 덮어쓰고 즉시 렌더링합니다.
+   * @param {string} key 
+   * @param {import('../types').EmoticonItem} item 
+   */
+  public addKeyword(key: string, item: import('../types').EmoticonItem): void {
+    const newKeywordMap = {
+      ...this.options.keywordMap,
+      [key]: item
+    };
+    this.setOptions({ keywordMap: newKeywordMap });
+  }
+
+  /**
+   * 특정 이모티콘 키워드를 맵에서 제거하고 즉시 렌더링합니다.
+   * @param {string} key 
+   */
+  public removeKeyword(key: string): void {
+    if (!this.options.keywordMap || !(key in this.options.keywordMap)) return;
+    
+    const newKeywordMap = { ...this.options.keywordMap };
+    delete newKeywordMap[key];
+    
+    this.setOptions({ keywordMap: newKeywordMap });
+  }
+
+  /**
    * 이벤트 리스너를 바인딩합니다.
    */
   private bindEvents(): void {

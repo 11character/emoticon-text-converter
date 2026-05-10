@@ -316,5 +316,35 @@ describe('EmoticonTextConverter', () => {
     expect(target.innerHTML).not.toContain('img');
     expect(CursorManager.getCursorPosition(target)).toBe(12);
   });
+
+  describe('Dynamic Keyword Management', () => {
+    it('should add a new keyword and re-render', () => {
+      converter.setText('New :joy:');
+      expect(target.innerHTML).not.toContain('img');
+
+      converter.addKeyword('joy', { url: 'joy.png' });
+      
+      expect(target.innerHTML).toContain('img');
+      expect(target.querySelector('img')?.getAttribute('src')).toBe('joy.png');
+      expect(converter.getKeywordMap()).toHaveProperty('joy');
+    });
+
+    it('should remove an existing keyword and re-render', () => {
+      converter.setText('Hello :smile:');
+      expect(target.innerHTML).toContain('img');
+
+      converter.removeKeyword('smile');
+
+      expect(target.innerHTML).not.toContain('img');
+      expect(target.textContent).toContain(':smile:');
+      expect(converter.getKeywordMap()).not.toHaveProperty('smile');
+    });
+
+    it('should return current keywordMap via getKeywordMap', () => {
+      const map = converter.getKeywordMap();
+      expect(map).toHaveProperty('heart');
+      expect(map.heart.url).toBe('heart.png');
+    });
+  });
 });
 

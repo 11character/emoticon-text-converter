@@ -76,6 +76,9 @@ const converter = new EmoticonTextConverter({
 - **`getText()`**: 현재 에디터의 내용을 이모티콘 키워드가 포함된 순수 텍스트로 반환합니다.
 - **`setText(text)`**: 에디터에 특정 텍스트를 설정하고 HTML로 변환하여 렌더링합니다.
 - **`insertText(text)`**: 현재 커서 위치에 텍스트를 삽입합니다.
+- **`addKeyword(key, item)`**: 새로운 이모티콘 키워드를 맵에 추가하거나 덮어쓰고 즉시 렌더링합니다.
+- **`removeKeyword(key)`**: 특정 이모티콘 키워드를 맵에서 제거하고 즉시 렌더링합니다.
+- **`getKeywordMap()`**: 현재 설정된 이모티콘 맵 객체를 반환합니다.
 - **`setOptions(options)`**: 동적으로 옵션을 변경하고 에디터 내용을 즉시 재변환합니다.
 - **`getCursorPosition()`**: 현재 커서의 논리적 위치(이모티콘/BR을 1글자로 취급)를 반환합니다.
 - **`clear()`**: 에디터의 내용을 모두 지웁니다.
