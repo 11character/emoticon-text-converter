@@ -1,56 +1,58 @@
+[🇺🇸 English (English)](./README.md) | [🇰🇷 한국어 (Korean)](./README.ko.md)
+
 # Emoticon Text Converter
 
-`contenteditable` 요소를 활용하여 텍스트 키워드(예: `:smile:`)를 실시간으로 이모티콘 이미지로 변환해주는 범용 라이브러리입니다. **TypeScript**를 완벽하게 지원하며 순수 자바스크립트 환경에서도 사용 가능합니다.
+A universal library that converts text keywords (e.g., `:smile:`) into emoticon images in real-time using `contenteditable` elements. Fully supports **TypeScript** and works in pure JavaScript environments.
 
-[**🚀 라이브 데모 확인하기**](https://lep.github.io/emoticon-text-converter/)
+[**🚀 Check out the Live Demo**](https://lep.github.io/emoticon-text-converter/)
 
-## 주요 특징
+## Key Features
 
-- **실시간 변환**: 사용자가 `:keyword:` 형태의 텍스트를 입력하면 즉시 지정된 이미지로 변환합니다.
-- **정밀한 커서 유지**: HTML 구조가 변경되더라도 `TreeWalker`와 `Range` API를 사용하여 사용자의 논리적인 커서 위치를 정확하게 유지합니다.
-- **권한 시스템**: `allowedGroups` 설정을 통해 사용자 그룹별로 이모티콘 노출 권한을 유연하게 제어할 수 있습니다 ($O(1)$ 검색 최적화).
-- **TypeScript 지원**: 강력한 타입 추론과 인터페이스를 제공하여 개발 생산성을 높입니다.
-- **Zero Dependency**: 외부 프레임워크나 라이브러리 없이 독립적으로 동작합니다.
-- **안전한 이벤트 처리**: IME(한글 등) 입력 및 조합 상태를 감지하여 변환 시점의 충돌을 방지합니다.
-- **보안**: 내부적으로 텍스트 엔티티화를 수행하여 XSS 공격으로부터 안전합니다.
+- **Real-time Conversion**: Instantly converts `:keyword:` text into specified images.
+- **Precise Cursor Persistence**: Maintains the user's logical cursor position accurately using `TreeWalker` and `Range` APIs even when the HTML structure changes.
+- **Permission System**: Flexible control over emoticon visibility by user groups using `allowedGroups` (optimized with $O(1)$ lookup).
+- **TypeScript Support**: Enhances productivity with strong type inference and interfaces.
+- **Zero Dependency**: Works independently without any external frameworks or libraries.
+- **Safe Event Handling**: Detects IME (e.g., Korean) input and composition states to prevent conflicts during conversion.
+- **Security**: Safe from XSS attacks by performing internal text entity encoding and blocking malicious drop events.
 
-## 설치 방법
+## Installation
 
 ```bash
 npm install emoticon-text-converter
 ```
 
-## 사용 방법
+## Usage
 
-### 1. HTML 준비
+### 1. Prepare HTML
 
 ```html
 <div id="my-editor" style="border: 1px solid #ccc; min-height: 100px;"></div>
 ```
 
-### 2. 라이브러리 초기화 (TypeScript/ESM)
+### 2. Initialize Library (TypeScript/ESM)
 
 ```typescript
 import { EmoticonTextConverter, KeywordMap } from 'emoticon-text-converter';
 
-// 1. 키워드 맵 정의 (url 및 접근 가능한 그룹 설정)
+// 1. Define Keyword Map (set URL and accessible groups)
 const keywordMap: KeywordMap = {
     'smile': { url: 'https://example.com/smile.png', groups: ['free', 'premium'] },
     'heart': { url: 'https://example.com/heart.png', groups: ['premium'] }
 };
 
-// 2. 컨버터 인스턴스 생성
+// 2. Create Converter Instance
 const converter = new EmoticonTextConverter({
     target: '#my-editor',
     keywordMap: keywordMap,
     emoticonSize: 24,
-    allowedGroups: { 'free': true }, // 현재 사용자가 속한 그룹
-    placeholder: '메시지를 입력하세요...',
+    allowedGroups: { 'free': true }, // Groups the current user belongs to
+    placeholder: 'Enter your message...',
     onInput: (text) => {
-        console.log('현재 텍스트:', text); // ":smile: 안녕하세요"
+        console.log('Current text:', text); // ":smile: Hello"
     },
     onEnter: (text) => {
-        console.log('메시지 전송:', text);
+        console.log('Message sent:', text);
         converter.clear();
     }
 });
@@ -58,46 +60,61 @@ const converter = new EmoticonTextConverter({
 
 ## API Specification
 
-### Constructor Options
+### 1. KeywordMap & EmoticonItem
+The `keywordMap` object defines which keywords map to which images and who can see them.
 
-| 옵션명 | 타입 | 기본값 | 설명 |
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `[key: string]` | `EmoticonItem` | The trigger keyword (e.g., `smile` for `:smile:`). |
+
+#### EmoticonItem Object
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `url` | `string` | **(Required)** The absolute or relative URL of the emoticon image. |
+| `groups` | `string[]` | *(Optional)* A list of group names that are allowed to use/see this emoticon. |
+
+### 2. Constructor Options (EmoticonTextConverterOptions)
+
+| Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `target` | `string` \| `HTMLElement` | `null` | 에디터로 사용할 DOM 요소 또는 셀렉터 |
-| `keywordMap` | `KeywordMap` | `{}` | 키워드별 이미지 URL 및 권한 설정 정보 |
-| `emoticonSize` | `number` | `28` | 이모티콘 이미지의 가로/세로 크기(px) |
-| `allowedGroups` | `Record<string, boolean>` | `{}` | 현재 사용자가 보유한 그룹 권한 맵 |
-| `placeholder` | `string` | `''` | 입력창이 비었을 때 표시할 문구 |
-| `onInput` | `(text: string) => void` | `undefined` | 내용이 변경될 때마다 호출되는 콜백 |
-| `onEnter` | `(text: string) => void` | `undefined` | 엔터 키 입력 시 호출되는 콜백 |
-| `disableEnter` | `boolean` | `false` | true일 경우 엔터 키를 통한 줄바꿈을 방지합니다. |
+| `target` | `string` \| `HTMLElement` | `null` | DOM element or selector to use as the editor. |
+| `keywordMap` | `KeywordMap` | `{}` | Map of keywords to image URLs and permissions. |
+| `emoticonSize` | `number` | `28` | Width and height of the emoticon images (in px). |
+| `allowedGroups` | `Record<string, boolean>` | `{}` | A map of groups the current user belongs to (e.g., `{ free: true }`). |
+| `placeholder` | `string` | `''` | Placeholder text shown when the editor is empty. |
+| `disableEnter` | `boolean` | `false` | If `true`, prevents line breaks via the Enter key. |
+| `onInput` | `(text: string) => void` | `undefined` | Fired whenever the text content changes. |
+| `onEnter` | `(text: string) => void` | `undefined` | Fired when the Enter key is pressed (unless Shift+Enter is used). |
+| `onFocus` | `() => void` | `undefined` | Fired when the editor gains focus. |
+| `onBlur` | `() => void` | `undefined` | Fired when the editor loses focus. |
 
-### Methods
+### 3. Methods
 
-- **`getText()`**: 현재 에디터의 내용을 이모티콘 키워드가 포함된 순수 텍스트로 반환합니다.
-- **`setText(text)`**: 에디터에 특정 텍스트를 설정하고 HTML로 변환하여 렌더링합니다.
-- **`insertText(text)`**: 현재 커서 위치에 텍스트를 삽입합니다.
-- **`addKeyword(key, item)`**: 새로운 이모티콘 키워드를 맵에 추가하거나 덮어쓰고 즉시 렌더링합니다.
-- **`removeKeyword(key)`**: 특정 이모티콘 키워드를 맵에서 제거하고 즉시 렌더링합니다.
-- **`getKeywordMap()`**: 현재 설정된 이모티콘 맵 객체를 반환합니다.
-- **`setOptions(options)`**: 동적으로 옵션을 변경하고 에디터 내용을 즉시 재변환합니다.
-- **`getCursorPosition()`**: 현재 커서의 논리적 위치(이모티콘/BR을 1글자로 취급)를 반환합니다.
-- **`clear()`**: 에디터의 내용을 모두 지웁니다.
-- **`getElement()`**: 에디터 DOM 요소를 반환합니다.
-- **`destroy()`**: 리스너를 해제하고 인스턴스를 정리합니다.
+- **`getText()`**: Returns the current editor content as plain text including emoticon keywords.
+- **`setText(text)`**: Sets specific text in the editor and renders it converted to HTML.
+- **`insertText(text)`**: Inserts text at the current cursor position.
+- **`addKeyword(key, item)`**: Adds or overwrites an emoticon keyword and re-renders immediately.
+- **`removeKeyword(key)`**: Removes a specific emoticon keyword and re-renders immediately.
+- **`getKeywordMap()`**: Returns the currently set emoticon map object.
+- **`setOptions(options)`**: Dynamically changes options and immediately re-converts the editor content.
+- **`getCursorPosition()`**: Returns the logical position of the cursor (treating emoticons/BR as 1 character).
+- **`clear()`**: Clears all content in the editor.
+- **`getElement()`**: Returns the editor's DOM element.
+- **`destroy()`**: Cleans up the instance and removes listeners.
 
-## 개발 및 테스트
+## Development & Testing
 
 ```bash
-# 의존성 설치
+# Install dependencies
 npm install
 
-# 개발 서버 실행
+# Run development server
 npm run dev
 
-# 테스트 실행
+# Run tests
 npm test
 ```
 
-## 라이선스
+## License
 
 MIT License.
