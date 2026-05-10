@@ -239,14 +239,6 @@ export class EmoticonTextConverter {
   }
 
   /**
-   * 이모티콘을 추가합니다.
-   * @param {{key: string, url: string}} emoticon 
-   */
-  public appendEmoticon(emoticon: { key: string; url: string }): void {
-    this.insertText(`:${emoticon.key}:`);
-  }
-
-  /**
    * 이벤트 리스너를 바인딩합니다.
    */
   private bindEvents(): void {

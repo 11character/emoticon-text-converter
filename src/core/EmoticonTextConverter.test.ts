@@ -76,11 +76,11 @@ describe('EmoticonTextConverter', () => {
     expect(converter.getText()).toBe('A :smile:! B');
   });
 
-  it('should append emoticon at the end', () => {
+  it('should insert emoticon keyword using insertText', () => {
     converter.setText('I love ');
     CursorManager.setCursorPosition(target, 7);
     
-    converter.appendEmoticon({ key: 'heart', url: 'heart.png' });
+    converter.insertText(':heart:');
     expect(converter.getText()).toBe('I love :heart:');
   });
 
