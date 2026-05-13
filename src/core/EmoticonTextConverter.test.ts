@@ -365,5 +365,70 @@ describe('EmoticonTextConverter', () => {
       expect(map.heart.url).toBe('heart.png');
     });
   });
+
+  describe('Read-Only Mode', () => {
+    it('should initialize with readonly mode correctly', () => {
+      const readonlyConverter = new EmoticonTextConverter({
+        target,
+        readonly: true
+      });
+      expect(target.getAttribute('contenteditable')).toBe('false');
+      expect(target.getAttribute('aria-readonly')).toBe('true');
+      expect(target.classList.contains('etc-read-only')).toBe(true);
+    });
+
+    it('should toggle readonly mode dynamically using setReadonly', () => {
+      converter.setReadonly(true);
+      expect(target.getAttribute('contenteditable')).toBe('false');
+      expect(target.getAttribute('aria-readonly')).toBe('true');
+      expect(target.classList.contains('etc-read-only')).toBe(true);
+
+      converter.setReadonly(false);
+      expect(target.getAttribute('contenteditable')).toBe('true');
+      expect(target.getAttribute('aria-readonly')).toBeNull();
+      expect(target.classList.contains('etc-read-only')).toBe(false);
+    });
+
+    it('should apply custom class prefix', () => {
+      const customConverter = new EmoticonTextConverter({
+        target,
+        readonly: true,
+        classPrefix: 'custom-'
+      });
+      expect(target.classList.contains('custom-read-only')).toBe(true);
+    });
+
+    it('should return correct status via isReadonly', () => {
+      expect(converter.isReadonly()).toBe(false);
+      converter.setReadonly(true);
+      expect(converter.isReadonly()).toBe(true);
+    });
+
+    it('should append text to the end when insertText is called in readonly mode', () => {
+      converter.setText('Existing');
+      converter.setReadonly(true);
+      
+      // Even if we try to set cursor (which shouldn't work on non-editable)
+      // insertText should append to the end.
+      converter.insertText(' Append');
+      
+      expect(converter.getText()).toBe('Existing Append');
+    });
+
+    it('should hide placeholder when in readonly mode and restore it when toggled off', () => {
+      const phConverter = new EmoticonTextConverter({
+        target,
+        placeholder: 'Input here'
+      });
+      
+      expect(target.getAttribute('data-placeholder')).toBe('Input here');
+      
+      phConverter.setReadonly(true);
+      expect(target.getAttribute('data-placeholder')).toBeNull();
+      
+      phConverter.setReadonly(false);
+      expect(target.getAttribute('data-placeholder')).toBe('Input here');
+    });
+  });
 });
 

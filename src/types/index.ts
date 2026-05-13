@@ -21,6 +21,8 @@ export interface EmoticonTextConverterOptions extends TextParserOptions {
   onFocus?: () => void;
   onBlur?: () => void;
   disableEnter?: boolean;
+  readonly?: boolean;
+  classPrefix?: string;
 }
 
 export interface EmoticonConverterState {

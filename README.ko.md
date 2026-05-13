@@ -100,6 +100,8 @@ const converter = new EmoticonTextConverter({
 - **`getCursorPosition()`**: 현재 커서의 논리적 위치(이모티콘/BR을 1글자로 취급)를 반환합니다.
 - **`clear()`**: 에디터의 내용을 모두 지웁니다.
 - **`getElement()`**: 에디터 DOM 요소를 반환합니다.
+- **`setReadonly(isReadonly)`**: 읽기 전용 상태를 동적으로 설정합니다. 읽기 전용 모드에서는 플레이스홀더가 숨겨집니다.
+- **`isReadonly()`**: 현재 읽기 전용 상태 여부를 반환합니다.
 - **`destroy()`**: 리스너를 해제하고 인스턴스를 정리합니다.
 
 ## 개발 및 테스트
@@ -116,5 +118,8 @@ npm test
 ```
 
 ## 라이선스
+
+MIT License.
+선스
 
 MIT License.

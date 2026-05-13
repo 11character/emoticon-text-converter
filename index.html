@@ -69,6 +69,15 @@
         #editor-container:focus {
             border-color: #1877f2;
         }
+        #readonly-container {
+            border: 2px solid #ff9800; /* Different border color */
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 40px;
+            font-size: 16px;
+            line-height: 1.6;
+            background-color: #fffaf0;
+        }
         #editor-container[data-placeholder]:empty:before {
             content: attr(data-placeholder);
             color: #8a8d91;
@@ -157,6 +166,11 @@
     <div class="main-container">
         <div class="left-panel">
             <div class="editor-section">
+                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;">읽기 전용 뷰어 (실시간 반영)</span>
+                <div id="readonly-container"></div>
+            </div>
+
+            <div class="editor-section">
                 <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;">에디터 입력</span>
                 <div id="editor-container"></div>
             </div>
@@ -188,6 +202,11 @@
                     <div class="flex-row">
                         <label class="toggle-item">
                             <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> 엔터 줄바꿈 비활성화 (Shift+Enter는 허용)
+                        </label>
+                        <label class="toggle-item" style="margin-left: 12px; display: flex; align-items: center; gap: 8px;">
+                            <span>이모티콘 크기:</span>
+                            <input type="range" min="16" max="64" value="24" oninput="toggleOption('emoticonSize', parseInt(this.value)); document.getElementById('size-display').textContent = this.value + 'px';">
+                            <span id="size-display" style="min-width: 40px;">24px</span>
                         </label>
                     </div>
                 </div>
@@ -253,10 +272,29 @@
         };
 
         const converter = new EmoticonTextConverter(config);
+        
+        // Read-only viewer initialization
+        const viewer = new EmoticonTextConverter({
+            target: '#readonly-container',
+            keywordMap,
+            emoticonSize: 24,
+            readonly: true,
+            allowedGroups: { ...config.allowedGroups }
+        });
+
         const editor = converter.getElement();
 
         let prevCursorPos = 0;
         let prevTextLen = 0;
+
+        // Sync viewer on input
+        const originalOnInput = config.onInput;
+        converter.setOptions({
+            onInput: (text) => {
+                viewer.setText(text);
+                originalOnInput(text);
+            }
+        });
 
         // 커서 위치 및 길이 동기화를 위해 클릭이나 키업 시에도 이전 값을 업데이트합니다.
         const updatePrevStats = () => {
@@ -299,13 +337,18 @@
 
         window.toggleGroup = (group, isAllowed) => {
             config.allowedGroups[group] = isAllowed;
-            converter.setOptions({ allowedGroups: { ...config.allowedGroups } });
+            const newGroups = { ...config.allowedGroups };
+            converter.setOptions({ allowedGroups: newGroups });
+            viewer.setOptions({ allowedGroups: newGroups });
             addLog('config', `Group [${group}] set to ${isAllowed}`);
         };
 
         window.toggleOption = (key, value) => {
             config[key] = value;
             converter.setOptions({ [key]: value });
+            if (key === 'emoticonSize') {
+                viewer.setOptions({ [key]: value });
+            }
             addLog('config', `Option [${key}] set to ${value}`);
         };
 

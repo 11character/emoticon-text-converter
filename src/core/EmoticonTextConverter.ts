@@ -25,6 +25,8 @@ export class EmoticonTextConverter {
     onFocus: () => {},
     onBlur: () => {},
     disableEnter: false,
+    readonly: false,
+    classPrefix: 'etc-',
   };
 
   private state: EmoticonConverterState = {
@@ -68,7 +70,51 @@ export class EmoticonTextConverter {
 
     // 에디터가 이미 초기화되어 있다면 내용을 즉시 재변환합니다.
     if (this.element) {
+      this.applyReadonlyState();
       this.convert();
+    }
+  }
+
+  /**
+   * 읽기 전용 상태를 설정합니다.
+   * @param {boolean} isReadonly 
+   */
+  public setReadonly(isReadonly: boolean): void {
+    this.options.readonly = isReadonly;
+    this.applyReadonlyState();
+  }
+
+  /**
+   * 현재 읽기 전용 상태를 반환합니다.
+   * @returns {boolean}
+   */
+  public isReadonly(): boolean {
+    return !!this.options.readonly;
+  }
+
+  /**
+   * 읽기 전용 옵션에 따라 DOM 속성 및 클래스를 적용합니다.
+   */
+  private applyReadonlyState(): void {
+    if (!this.element) return;
+
+    const { readonly, classPrefix, placeholder } = this.options;
+    const readonlyClass = `${classPrefix}read-only`;
+
+    if (readonly) {
+      this.element.setAttribute('contenteditable', 'false');
+      this.element.setAttribute('aria-readonly', 'true');
+      this.element.classList.add(readonlyClass);
+      // 읽기 전용일 때는 플레이스홀더를 표시하지 않도록 속성을 제거합니다.
+      this.element.removeAttribute('data-placeholder');
+    } else {
+      this.element.setAttribute('contenteditable', 'true');
+      this.element.removeAttribute('aria-readonly');
+      this.element.classList.remove(readonlyClass);
+      // 일반 모드일 때 플레이스홀더가 설정되어 있다면 속성을 복구합니다.
+      if (placeholder) {
+        this.element.setAttribute('data-placeholder', placeholder);
+      }
     }
   }
 
@@ -97,13 +143,9 @@ export class EmoticonTextConverter {
       this.element = document.createElement('div');
     }
 
-    this.element.setAttribute('contenteditable', 'true');
+    this.applyReadonlyState();
     this.element.style.outline = 'none';
     this.element.style.overflowWrap = 'anywhere'; // break-all equivalent
-    
-    if (this.options.placeholder) {
-      this.element.setAttribute('data-placeholder', this.options.placeholder);
-    }
   }
 
   /**
@@ -198,6 +240,17 @@ export class EmoticonTextConverter {
    * 커서 위치에 텍스트를 삽입합니다.
    */
   public insertText(str: string): void {
+    if (this.options.readonly) {
+      // 읽기 전용 모드인 경우 커서 위치와 상관없이 마지막에 추가합니다.
+      const text = this.getText();
+      const newText = text + str;
+      this.state.text = newText;
+      this.element.innerHTML = this.parser.toHtml(newText);
+      this.options.onInput?.(newText);
+      this.pushHistory(false);
+      return;
+    }
+
     const cursorOffset = CursorManager.getCursorPosition(this.element);
     const text = this.getText();
 

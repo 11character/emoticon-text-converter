@@ -100,6 +100,8 @@ The `keywordMap` object defines which keywords map to which images and who can s
 - **`getCursorPosition()`**: Returns the logical position of the cursor (treating emoticons/BR as 1 character).
 - **`clear()`**: Clears all content in the editor.
 - **`getElement()`**: Returns the editor's DOM element.
+- **`setReadonly(isReadonly)`**: Dynamically sets the read-only state. In read-only mode, the placeholder is hidden.
+- **`isReadonly()`**: Returns whether the editor is currently in read-only mode.
 - **`destroy()`**: Cleans up the instance and removes listeners.
 
 ## Development & Testing
@@ -118,3 +120,4 @@ npm test
 ## License
 
 MIT License.
+.
