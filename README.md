@@ -4,7 +4,7 @@
 
 A universal library that converts text keywords (e.g., `:smile:`) into emoticon images in real-time using `contenteditable` elements. Fully supports **TypeScript** and works in pure JavaScript environments.
 
-[**🚀 Check out the Live Demo**](https://lep.github.io/emoticon-text-converter/)
+[**🚀 Check out the Live Demo**](https://11character.github.io/emoticon-text-converter/)
 
 ## Key Features
 

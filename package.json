@@ -36,7 +36,15 @@
     "contenteditable",
     "vanilla-js"
   ],
-  "author": "YOUR_NAME <your.email@example.com>",
+  "author": "11character <gm20813@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/11character/emoticon-text-converter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/11character/emoticon-text-converter/issues"
+  },
+  "homepage": "https://11character.github.io/emoticon-text-converter/",
   "license": "MIT",
   "engines": {
     "node": ">=14.0.0"

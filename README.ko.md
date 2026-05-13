@@ -4,7 +4,7 @@
 
 `contenteditable` 요소를 활용하여 텍스트 키워드(예: `:smile:`)를 실시간으로 이모티콘 이미지로 변환해주는 범용 라이브러리입니다. **TypeScript**를 완벽하게 지원하며 순수 자바스크립트 환경에서도 사용 가능합니다.
 
-[**🚀 라이브 데모 확인하기**](https://lep.github.io/emoticon-text-converter/)
+[**🚀 라이브 데모 확인하기**](https://11character.github.io/emoticon-text-converter/)
 
 ## 주요 특징
 
