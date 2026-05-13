@@ -1,5 +1,6 @@
 import { TextParser } from '../parser/TextParser';
 import { CursorManager } from '../utils/CursorManager';
+import { HistoryManager } from '../utils/HistoryManager';
 import { 
   EmoticonTextConverterOptions, 
   EmoticonConverterState 
@@ -11,6 +12,7 @@ import {
 export class EmoticonTextConverter {
   private element!: HTMLElement;
   private parser!: TextParser;
+  private history!: HistoryManager;
 
   private options: EmoticonTextConverterOptions = {
     target: null,
@@ -41,10 +43,14 @@ export class EmoticonTextConverter {
    * @param {EmoticonTextConverterOptions} options 
    */
   constructor(options: EmoticonTextConverterOptions = {}) {
+    this.history = new HistoryManager();
     this.setOptions(options);
     this.initParser();
     this.initElement();
     this.bindEvents();
+    
+    // 초기 상태 저장
+    this.pushHistory(false);
   }
 
   /**
@@ -124,6 +130,7 @@ export class EmoticonTextConverter {
     this.state.text = text;
     this.element.innerHTML = this.parser.toHtml(text);
     this.options.onInput?.(text);
+    this.pushHistory(false);
   }
 
   /**
@@ -133,6 +140,7 @@ export class EmoticonTextConverter {
     this.element.innerHTML = '';
     this.state.text = '';
     this.options.onInput?.('');
+    this.pushHistory(false);
   }
 
   /**
@@ -208,6 +216,7 @@ export class EmoticonTextConverter {
     CursorManager.setCursorPosition(this.element, newPos);
     
     this.options.onInput?.(newText);
+    this.pushHistory(false);
   }
 
   /**
@@ -293,6 +302,15 @@ export class EmoticonTextConverter {
     el.addEventListener('drop', (e: DragEvent) => {
       this.onDrop(e);
     });
+    el.addEventListener('beforeinput', (e: InputEvent) => {
+      if (e.inputType === 'historyUndo') {
+        e.preventDefault();
+        this.undo();
+      } else if (e.inputType === 'historyRedo') {
+        e.preventDefault();
+        this.redo();
+      }
+    });
     el.addEventListener('focus', () => {
       this.options.onFocus?.();
     });
@@ -310,6 +328,26 @@ export class EmoticonTextConverter {
 
     if (this.state.isConverting) {
       e.preventDefault();
+      return;
+    }
+
+    const isMod = this.state.isDownMeta || this.state.isDownCtrl;
+    const isShift = this.state.isDownShift;
+
+    // Undo: Ctrl/Cmd + Z
+    if (isMod && !isShift && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      this.undo();
+      return;
+    }
+
+    // Redo: Ctrl/Cmd + Shift + Z or Ctrl + Y
+    if (
+      (isMod && isShift && e.key.toLowerCase() === 'z') || 
+      (this.state.isDownCtrl && e.key.toLowerCase() === 'y')
+    ) {
+      e.preventDefault();
+      this.redo();
       return;
     }
 
@@ -352,6 +390,7 @@ export class EmoticonTextConverter {
   private onInput(e: Event): void {
     this.state.text = this.getText();
     this.options.onInput?.(this.state.text);
+    this.pushHistory(true);
   }
 
   private onPaste(e: ClipboardEvent): void {
@@ -387,6 +426,7 @@ export class EmoticonTextConverter {
     
     this.state.isConverting = false;
     this.options.onInput?.(text);
+    this.pushHistory(false);
   }
 
   private insertLineBreak(): void {
@@ -412,6 +452,34 @@ export class EmoticonTextConverter {
 
     this.state.text = this.getText();
     this.options.onInput?.(this.state.text);
+    this.pushHistory(false);
+  }
+
+  private pushHistory(isTyping: boolean = false): void {
+    const text = this.getText();
+    const cursorPosition = CursorManager.getCursorPosition(this.element);
+    this.history.push({ text, cursorPosition }, isTyping);
+  }
+
+  private undo(): void {
+    const state = this.history.undo();
+    if (state) {
+      this.restoreState(state);
+    }
+  }
+
+  private redo(): void {
+    const state = this.history.redo();
+    if (state) {
+      this.restoreState(state);
+    }
+  }
+
+  private restoreState(state: { text: string; cursorPosition: number }): void {
+    this.state.text = state.text;
+    this.element.innerHTML = this.parser.toHtml(state.text);
+    CursorManager.setCursorPosition(this.element, state.cursorPosition);
+    this.options.onInput?.(state.text);
   }
 
   private updateStateFromEvent(e: KeyboardEvent): void {

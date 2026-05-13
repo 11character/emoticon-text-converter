@@ -271,6 +271,21 @@
             converter.insertText(`:${key}:`);
         };
 
+        // 키 조합 로깅을 위한 이벤트 리스너 추가
+        editor.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) {
+                const keys = [];
+                if (e.metaKey) keys.push('Cmd');
+                if (e.ctrlKey) keys.push('Ctrl');
+                if (e.altKey) keys.push('Alt');
+                if (e.shiftKey) keys.push('Shift');
+                keys.push(e.key.toUpperCase());
+                
+                const combo = keys.join(' + ');
+                addLog('shortcut', `Key pressed: ${combo}`);
+            }
+        });
+
         window.clearEditor = () => {
             converter.clear();
             addLog('action', 'Editor cleared');

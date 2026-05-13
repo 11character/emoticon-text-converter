@@ -35,6 +35,11 @@ export interface EmoticonConverterState {
   isDownMeta: boolean;
 }
 
+export interface HistoryState {
+  text: string;
+  cursorPosition: number;
+}
+
 declare global {
   interface Event {
     // _isETC 플래그는 더 이상 사용되지 않습니다 (콜백 방식으로 전환)

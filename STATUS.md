@@ -13,6 +13,7 @@
 | `src/parser/TextParser.ts` | 텍스트 <-> HTML 변환 로직 | 완료 |
 | `src/utils/CursorManager.ts` | TreeWalker 기반 커서 관리 | 완료 |
 | `src/core/EmoticonTextConverter.ts` | 이벤트 바인딩 및 상태 관리 | 완료 |
+| `src/utils/HistoryManager.ts` | Undo/Redo 히스토리 관리 | 완료 |
 
 ## 3. 현재 진행 상황 (Current Progress)
 - [x] **프로젝트 초기화**: ESM 모듈 구조 및 테스트 환경(Vitest, JSDOM) 구축.
@@ -28,6 +29,7 @@
 - [x] **데모 및 문서화**: 시뮬레이터가 포함된 데모 페이지 및 사용 가이드 작성. (데모 페이지 그룹 명칭 불일치 수정 완료)
 - [x] **보안 강화**: Drag & Drop XSS 방지 및 HTML 속성 인젝션 방지 로직 적용.
 - [x] **검증 및 테스트**: 엣지 케이스 및 보안 테스트 포함 총 45개 테스트 케이스 통과.
+- [x] **커스텀 Undo/Redo 구현**: `innerHTML` 변경 시 네이티브 히스토리가 깨지는 문제를 해결하기 위해 `HistoryManager`를 통한 수동 히스토리 스택 관리 기능 추가. 원본 텍스트 보존 및 타이핑 그룹화 지원.
 
 ## 4. 핵심 기술 노트 (Technical Notes)
 - **커서 관리**: `img`(이모티콘)와 `br`을 각각 1글자로 취급하는 논리적 위치 시스템.
@@ -38,7 +40,8 @@
     - `drop` 이벤트 차단 및 `text/plain`만 수용하여 HTML 삽입 공격 방지.
     - `toHtml` 변환 시 속성 이스케이프(`&quot;`)를 적용하여 속성 주입 공격 차단.
 - **그룹 권한**: `allowedGroups` 설정을 통해 사용자별 이모티콘 노출 권한을 유연하게 제어.
+- **Undo/Redo**: 원본 텍스트와 논리적 커서 위치를 스택에 저장하여 복구하며, 복구 시 실시간 옵션을 재적용하는 로직 구현.
 
 ---
-*마지막 업데이트: 2026-05-10 (배포 준비 및 데모 수정 완료)*
+*마지막 업데이트: 2026-05-13 (Undo/Redo 기능 추가)*
 
