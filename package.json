@@ -19,7 +19,8 @@
     "dev": "vite",
     "test": "vitest",
     "test:run": "vitest run",
-    "build": "vite build"
+    "build": "vite build",
+    "build:demo": "vite build -c vite.demo.config.ts"
   },
   "devDependencies": {
     "@types/jsdom": "^28.0.1",
