@@ -182,10 +182,9 @@
                         <button onclick="appendEmoji('smile')">😊 :smile: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('heart')">❤️ :heart: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('vip-star')">⭐ :vip-star: <small style="color: #888">(premium)</small></button>
-                        <!-- New Wave and Arrow samples -->
-                        <button onclick="appendEmoji('wave')"><img src="https://cdn-icons-png.flaticon.com/512/10542/10542562.png" width="16" height="16" style="vertical-align: middle;"> :wave: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('arrow-right')"><img src="https://cdn-icons-png.flaticon.com/512/271/271228.png" width="16" height="16" style="vertical-align: middle;"> :arrow-right: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('arrow-up')"><img src="https://cdn-icons-png.flaticon.com/512/271/271218.png" width="16" height="16" style="vertical-align: middle;"> :arrow-up: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('rocket')">🚀 :rocket: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('coffee')">☕ :coffee: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('cat')">🐱 :cat: <small style="color: #888">(basic)</small></button>
                     </div>
                 </div>
 
@@ -193,7 +192,7 @@
                     <h3>데이터 조작</h3>
                     <div class="flex-row">
                         <button onclick="clearEditor()">내용 비우기</button>
-                        <button onclick="setSampleText()">샘플 텍스트 설정</button>
+                        <button onclick="setSampleText()">모든 이모티콘 포함 샘플 설정</button>
                     </div>
                 </div>
 
@@ -249,9 +248,9 @@
             'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', groups: ['basic', 'premium'] },
             'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', groups: ['basic', 'premium'] },
             'vip-star': { url: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png', groups: ['premium'] },
-            'wave': { url: 'https://cdn-icons-png.flaticon.com/512/10542/10542562.png', groups: ['basic'] },
-            'arrow-right': { url: 'https://cdn-icons-png.flaticon.com/512/271/271228.png', groups: ['basic'] },
-            'arrow-up': { url: 'https://cdn-icons-png.flaticon.com/512/271/271218.png', groups: ['basic'] }
+            'rocket': { url: 'https://cdn-icons-png.flaticon.com/512/1356/1356479.png', groups: ['basic'] },
+            'coffee': { url: 'https://cdn-icons-png.flaticon.com/512/2935/2935308.png', groups: ['basic'] },
+            'cat': { url: 'https://cdn-icons-png.flaticon.com/512/616/616430.png', groups: ['basic'] }
         };
 
         const config = {
@@ -345,9 +344,10 @@
         };
 
         window.setSampleText = () => {
-            const sample = "안녕하세요! :smile: 반갑습니다.\n이것은 엔터가 포함된 :heart: 샘플입니다.";
+            const keys = Object.keys(keywordMap).map(k => `:${k}:`).join(' ');
+            const sample = `안녕하세요! 모든 이모티콘을 사용해봅니다.\n${keys}\n다양한 그룹 권한과 함께 테스트해보세요!`;
             converter.setText(sample);
-            addLog('action', 'Sample text applied');
+            addLog('action', 'All emoticons sample text applied');
         };
 
         window.toggleGroup = (group, isAllowed) => {
