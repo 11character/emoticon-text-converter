@@ -100,8 +100,19 @@ The `keywordMap` object defines which keywords map to which images and who can s
 - **`getCursorPosition()`**: Returns the logical position of the cursor (treating emoticons/BR as 1 character).
 - **`clear()`**: Clears all content in the editor.
 - **`getElement()`**: Returns the editor's DOM element.
-- **`setReadonly(isReadonly)`**: Dynamically sets the read-only state. In read-only mode, the placeholder is hidden.
+- **`setReadonly(isReadonly)`**: Dynamically sets the read-only state.
 - **`isReadonly()`**: Returns whether the editor is currently in read-only mode.
+- **`setEmoticonSize(size)`**: Sets the width/height of emoticons.
+- **`getEmoticonSize()`**: Returns the current emoticon size.
+- **`setPlaceholder(text)`**: Sets the placeholder text.
+- **`getPlaceholder()`**: Returns the current placeholder text.
+- **`setDisableEnter(disable)`**: Sets whether the Enter key is disabled.
+- **`isDisableEnter()`**: Returns whether the Enter key is disabled.
+- **`setAllowedGroups(groups)`**: Sets the map of allowed groups.
+- **`getAllowedGroups()`**: Returns the current map of allowed groups.
+- **`setGroupAllowed(groupName, isAllowed)`**: Enables or disables a specific group.
+- **`setClassPrefix(prefix)`**: Sets the CSS class prefix.
+- **`getClassPrefix()`**: Returns the current CSS class prefix.
 - **`destroy()`**: Cleans up the instance and removes listeners.
 
 ## Development & Testing

@@ -55,6 +55,29 @@ export class EmoticonTextConverter {
     this.pushHistory(false);
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*  1. Core & Element Methods                                                 */
+  /* -------------------------------------------------------------------------- */
+
+  /**
+   * 에디터 요소를 반환합니다.
+   * @returns {HTMLElement}
+   */
+  public getElement(): HTMLElement {
+    return this.element;
+  }
+
+  /**
+   * 모든 리스너를 제거하고 정리합니다.
+   */
+  public destroy(): void {
+    // 필요한 경우 이벤트 리스너 제거 로직 추가
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*  2. Option Management                                                      */
+  /* -------------------------------------------------------------------------- */
+
   /**
    * 옵션을 설정하고 기존 옵션과 병합합니다.
    * @param {EmoticonTextConverterOptions} options 
@@ -91,6 +114,271 @@ export class EmoticonTextConverter {
   public isReadonly(): boolean {
     return !!this.options.readonly;
   }
+
+  /**
+   * 이모티콘 렌더링 크기를 설정합니다.
+   * @param {number} size 
+   */
+  public setEmoticonSize(size: number): void {
+    this.setOptions({ emoticonSize: size });
+  }
+
+  /**
+   * 현재 이모티콘 렌더링 크기를 반환합니다.
+   * @returns {number}
+   */
+  public getEmoticonSize(): number {
+    return this.options.emoticonSize || 28;
+  }
+
+  /**
+   * 플레이스홀더 텍스트를 설정합니다.
+   * @param {string} text 
+   */
+  public setPlaceholder(text: string): void {
+    this.options.placeholder = text;
+    this.applyReadonlyState();
+  }
+
+  /**
+   * 현재 플레이스홀더 텍스트를 반환합니다.
+   * @returns {string}
+   */
+  public getPlaceholder(): string {
+    return this.options.placeholder || '';
+  }
+
+  /**
+   * 엔터키 입력 시 줄바꿈 비활성화 여부를 설정합니다.
+   * @param {boolean} disable 
+   */
+  public setDisableEnter(disable: boolean): void {
+    this.options.disableEnter = disable;
+  }
+
+  /**
+   * 현재 엔터키 줄바꿈 비활성화 여부를 반환합니다.
+   * @returns {boolean}
+   */
+  public isDisableEnter(): boolean {
+    return !!this.options.disableEnter;
+  }
+
+  /**
+   * 허용된 이모티콘 그룹 목록을 설정합니다.
+   * @param {Record<string, boolean>} groups 
+   */
+  public setAllowedGroups(groups: Record<string, boolean>): void {
+    this.setOptions({ allowedGroups: groups });
+  }
+
+  /**
+   * 현재 허용된 이모티콘 그룹 목록을 반환합니다.
+   * @returns {Record<string, boolean>}
+   */
+  public getAllowedGroups(): Record<string, boolean> {
+    return this.options.allowedGroups || {};
+  }
+
+  /**
+   * 특정 그룹의 허용 여부를 설정합니다.
+   * @param {string} groupName 
+   * @param {boolean} isAllowed 
+   */
+  public setGroupAllowed(groupName: string, isAllowed: boolean): void {
+    const groups = { ...this.getAllowedGroups(), [groupName]: isAllowed };
+    this.setAllowedGroups(groups);
+  }
+
+  /**
+   * CSS 클래스 접두사를 설정합니다.
+   * @param {string} prefix 
+   */
+  public setClassPrefix(prefix: string): void {
+    const oldPrefix = this.options.classPrefix;
+    this.options.classPrefix = prefix;
+    
+    if (this.element && oldPrefix !== prefix) {
+      // 기존 클래스 제거 및 새 클래스 적용을 위해 상태 재적용
+      if (this.options.readonly) {
+        this.element.classList.remove(`${oldPrefix}read-only`);
+      }
+      this.applyReadonlyState();
+      this.convert();
+    }
+  }
+
+  /**
+   * 현재 설정된 CSS 클래스 접두사를 반환합니다.
+   * @returns {string}
+   */
+  public getClassPrefix(): string {
+    return this.options.classPrefix || 'etc-';
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*  3. Content Management                                                     */
+  /* -------------------------------------------------------------------------- */
+
+  /**
+   * 현재 텍스트를 반환합니다.
+   * @returns {string}
+   */
+  public getText(): string {
+    return this.parser.toText(this.element);
+  }
+
+  /**
+   * 텍스트를 설정하고 HTML을 갱신합니다.
+   * @param {string} text 
+   */
+  public setText(text: string): void {
+    this.state.text = text;
+    this.element.innerHTML = this.parser.toHtml(text);
+    this.options.onInput?.(text);
+    this.pushHistory(false);
+  }
+
+  /**
+   * 에디터 내용을 비웁니다.
+   */
+  public clear(): void {
+    this.element.innerHTML = '';
+    this.state.text = '';
+    this.options.onInput?.('');
+    this.pushHistory(false);
+  }
+
+  /**
+   * 커서 위치에 텍스트를 삽입합니다.
+   */
+  public insertText(str: string): void {
+    if (this.options.readonly) {
+      // 읽기 전용 모드인 경우 커서 위치와 상관없이 마지막에 추가합니다.
+      const text = this.getText();
+      const newText = text + str;
+      this.state.text = newText;
+      this.element.innerHTML = this.parser.toHtml(newText);
+      this.options.onInput?.(newText);
+      this.pushHistory(false);
+      return;
+    }
+
+    const cursorOffset = CursorManager.getCursorPosition(this.element);
+    const text = this.getText();
+
+    const textIndex = this.getOriginalTextIndex(cursorOffset);
+
+    const startText = text.slice(0, textIndex);
+    const endText = text.slice(textIndex);
+
+    const newText = `${startText}${str}${endText}`;
+    
+    this.state.text = newText;
+    this.element.innerHTML = this.parser.toHtml(newText);
+    
+    // 삽입된 문자열을 포함한 앞부분의 새로운 논리적 위치 계산
+    const newPos = this.getExpectedLogicalLength(startText + str);
+    CursorManager.setCursorPosition(this.element, newPos);
+    
+    this.options.onInput?.(newText);
+    this.pushHistory(false);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*  4. Keyword Management                                                     */
+  /* -------------------------------------------------------------------------- */
+
+  /**
+   * 현재 설정된 이모티콘 맵 객체를 반환합니다.
+   * @returns {KeywordMap}
+   */
+  public getKeywordMap(): import('../types').KeywordMap {
+    return this.options.keywordMap || {};
+  }
+
+  /**
+   * 새로운 이모티콘 키워드를 맵에 추가하거나 덮어쓰고 즉시 렌더링합니다.
+   * @param {string} key 
+   * @param {import('../types').EmoticonItem} item 
+   */
+  public addKeyword(key: string, item: import('../types').EmoticonItem): void {
+    const newKeywordMap = {
+      ...this.getKeywordMap(),
+      [key]: item
+    };
+    this.setOptions({ keywordMap: newKeywordMap });
+  }
+
+  /**
+   * 특정 이모티콘 키워드를 맵에서 제거하고 즉시 렌더링합니다.
+   * @param {string} key 
+   */
+  public removeKeyword(key: string): void {
+    const keywordMap = this.getKeywordMap();
+    if (!(key in keywordMap)) return;
+    
+    const newKeywordMap = { ...keywordMap };
+    delete newKeywordMap[key];
+    
+    this.setOptions({ keywordMap: newKeywordMap });
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*  5. History Management                                                     */
+  /* -------------------------------------------------------------------------- */
+
+  /**
+   * 이전 상태로 되돌립니다.
+   */
+  public undo(): void {
+    const state = this.history.undo();
+    if (state) {
+      this.restoreState(state);
+    }
+  }
+
+  /**
+   * 되돌린 상태를 다시 적용합니다.
+   */
+  public redo(): void {
+    const state = this.history.redo();
+    if (state) {
+      this.restoreState(state);
+    }
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*  6. Information & Utilities                                                */
+  /* -------------------------------------------------------------------------- */
+
+  /**
+   * 원본 텍스트의 길이를 반환합니다. (:keyword: 포함)
+   * @returns {number}
+   */
+  public getOriginalTextLength(): number {
+    return this.getText().length;
+  }
+
+  /**
+   * 변환 후의 논리적 텍스트 길이를 반환합니다. (이모티콘 1글자 취급)
+   * @returns {number}
+   */
+  public getConvertedTextLength(): number {
+    return CursorManager.getLogicalLength(this.element);
+  }
+
+  /**
+   * 현재 커서의 논리적 위치를 반환합니다.
+   * @returns {number}
+   */
+  public getCursorPosition(): number {
+    return CursorManager.getCursorPosition(this.element);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*  7. Internal Initialization & Helpers                                      */
+  /* -------------------------------------------------------------------------- */
 
   /**
    * 읽기 전용 옵션에 따라 DOM 속성 및 클래스를 적용합니다.
@@ -149,67 +437,6 @@ export class EmoticonTextConverter {
   }
 
   /**
-   * 에디터 요소를 반환합니다.
-   * @returns {HTMLElement}
-   */
-  public getElement(): HTMLElement {
-    return this.element;
-  }
-
-  /**
-   * 현재 텍스트를 반환합니다.
-   * @returns {string}
-   */
-  public getText(): string {
-    return this.parser.toText(this.element);
-  }
-
-  /**
-   * 텍스트를 설정하고 HTML을 갱신합니다.
-   * @param {string} text 
-   */
-  public setText(text: string): void {
-    this.state.text = text;
-    this.element.innerHTML = this.parser.toHtml(text);
-    this.options.onInput?.(text);
-    this.pushHistory(false);
-  }
-
-  /**
-   * 에디터 내용을 비웁니다.
-   */
-  public clear(): void {
-    this.element.innerHTML = '';
-    this.state.text = '';
-    this.options.onInput?.('');
-    this.pushHistory(false);
-  }
-
-  /**
-   * 원본 텍스트의 길이를 반환합니다. (:keyword: 포함)
-   * @returns {number}
-   */
-  public getOriginalTextLength(): number {
-    return this.getText().length;
-  }
-
-  /**
-   * 변환 후의 논리적 텍스트 길이를 반환합니다. (이모티콘 1글자 취급)
-   * @returns {number}
-   */
-  public getConvertedTextLength(): number {
-    return CursorManager.getLogicalLength(this.element);
-  }
-
-  /**
-   * 현재 커서의 논리적 위치를 반환합니다.
-   * @returns {number}
-   */
-  public getCursorPosition(): number {
-    return CursorManager.getCursorPosition(this.element);
-  }
-
-  /**
    * 논리적 커서 위치를 바탕으로 원본 텍스트(keyword 포함)에서의 인덱스를 계산합니다.
    * @param {number} logicalOffset 
    * @returns {number}
@@ -234,42 +461,6 @@ export class EmoticonTextConverter {
     const temp = document.createElement('div');
     temp.innerHTML = html;
     return CursorManager.getLogicalLength(temp);
-  }
-
-  /**
-   * 커서 위치에 텍스트를 삽입합니다.
-   */
-  public insertText(str: string): void {
-    if (this.options.readonly) {
-      // 읽기 전용 모드인 경우 커서 위치와 상관없이 마지막에 추가합니다.
-      const text = this.getText();
-      const newText = text + str;
-      this.state.text = newText;
-      this.element.innerHTML = this.parser.toHtml(newText);
-      this.options.onInput?.(newText);
-      this.pushHistory(false);
-      return;
-    }
-
-    const cursorOffset = CursorManager.getCursorPosition(this.element);
-    const text = this.getText();
-
-    const textIndex = this.getOriginalTextIndex(cursorOffset);
-
-    const startText = text.slice(0, textIndex);
-    const endText = text.slice(textIndex);
-
-    const newText = `${startText}${str}${endText}`;
-    
-    this.state.text = newText;
-    this.element.innerHTML = this.parser.toHtml(newText);
-    
-    // 삽입된 문자열을 포함한 앞부분의 새로운 논리적 위치 계산
-    const newPos = this.getExpectedLogicalLength(startText + str);
-    CursorManager.setCursorPosition(this.element, newPos);
-    
-    this.options.onInput?.(newText);
-    this.pushHistory(false);
   }
 
   /**
@@ -298,40 +489,6 @@ export class EmoticonTextConverter {
     temp.appendChild(fragment);
 
     return Array.from(temp.querySelectorAll('img')) as HTMLImageElement[];
-  }
-
-  /**
-   * 현재 설정된 이모티콘 맵 객체를 반환합니다.
-   * @returns {KeywordMap}
-   */
-  public getKeywordMap(): import('../types').KeywordMap {
-    return this.options.keywordMap || {};
-  }
-
-  /**
-   * 새로운 이모티콘 키워드를 맵에 추가하거나 덮어쓰고 즉시 렌더링합니다.
-   * @param {string} key 
-   * @param {import('../types').EmoticonItem} item 
-   */
-  public addKeyword(key: string, item: import('../types').EmoticonItem): void {
-    const newKeywordMap = {
-      ...this.options.keywordMap,
-      [key]: item
-    };
-    this.setOptions({ keywordMap: newKeywordMap });
-  }
-
-  /**
-   * 특정 이모티콘 키워드를 맵에서 제거하고 즉시 렌더링합니다.
-   * @param {string} key 
-   */
-  public removeKeyword(key: string): void {
-    if (!this.options.keywordMap || !(key in this.options.keywordMap)) return;
-    
-    const newKeywordMap = { ...this.options.keywordMap };
-    delete newKeywordMap[key];
-    
-    this.setOptions({ keywordMap: newKeywordMap });
   }
 
   /**
@@ -424,7 +581,7 @@ export class EmoticonTextConverter {
     const text = this.getText();
     this.state.text = text;
 
-    if (key === ':' || key === ';') {
+    if (key === ':' || key === ';' || key === ' ') {
       this.convert();
     }
 
@@ -514,20 +671,6 @@ export class EmoticonTextConverter {
     this.history.push({ text, cursorPosition }, isTyping);
   }
 
-  private undo(): void {
-    const state = this.history.undo();
-    if (state) {
-      this.restoreState(state);
-    }
-  }
-
-  private redo(): void {
-    const state = this.history.redo();
-    if (state) {
-      this.restoreState(state);
-    }
-  }
-
   private restoreState(state: { text: string; cursorPosition: number }): void {
     this.state.text = state.text;
     this.element.innerHTML = this.parser.toHtml(state.text);
@@ -541,9 +684,5 @@ export class EmoticonTextConverter {
     this.state.isDownAlt = e.altKey;
     this.state.isDownMeta = e.metaKey;
     this.state.isImeInput = e.isComposing;
-  }
-
-  public destroy(): void {
-    // Cleanup logic
   }
 }

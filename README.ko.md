@@ -100,8 +100,19 @@ const converter = new EmoticonTextConverter({
 - **`getCursorPosition()`**: 현재 커서의 논리적 위치(이모티콘/BR을 1글자로 취급)를 반환합니다.
 - **`clear()`**: 에디터의 내용을 모두 지웁니다.
 - **`getElement()`**: 에디터 DOM 요소를 반환합니다.
-- **`setReadonly(isReadonly)`**: 읽기 전용 상태를 동적으로 설정합니다. 읽기 전용 모드에서는 플레이스홀더가 숨겨집니다.
+- **`setReadonly(isReadonly)`**: 읽기 전용 상태를 동적으로 설정합니다.
 - **`isReadonly()`**: 현재 읽기 전용 상태 여부를 반환합니다.
+- **`setEmoticonSize(size)`**: 이모티콘의 크기(px)를 설정합니다.
+- **`getEmoticonSize()`**: 현재 설정된 이모티콘 크기를 반환합니다.
+- **`setPlaceholder(text)`**: 플레이스홀더 문구를 설정합니다.
+- **`getPlaceholder()`**: 현재 설정된 플레이스홀더 문구를 반환합니다.
+- **`setDisableEnter(disable)`**: 엔터 키 줄바꿈 비활성화 여부를 설정합니다.
+- **`isDisableEnter()`**: 엔터 키 줄바꿈 비활성화 여부를 반환합니다.
+- **`setAllowedGroups(groups)`**: 허용된 그룹 권한 맵을 설정합니다.
+- **`getAllowedGroups()`**: 현재 허용된 그룹 권한 맵을 반환합니다.
+- **`setGroupAllowed(groupName, isAllowed)`**: 특정 그룹의 허용 여부를 개별적으로 설정합니다.
+- **`setClassPrefix(prefix)`**: CSS 클래스 접두사를 설정합니다.
+- **`getClassPrefix()`**: 현재 설정된 CSS 클래스 접두사를 반환합니다.
 - **`destroy()`**: 리스너를 해제하고 인스턴스를 정리합니다.
 
 ## 개발 및 테스트
