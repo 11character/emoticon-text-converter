@@ -157,7 +157,7 @@
         .log-type { color: #4ec9b0; font-weight: bold; margin-right: 8px; }
         .log-msg { color: #ce9178; word-break: break-all; }
     </style>
-  <script type="module" crossorigin src="./assets/index-Rod6E_-W.js"></script>
+  <script type="module" crossorigin src="./assets/index-Dfjkypf6.js"></script>
 </head>
 <body>
     <div class="header">
@@ -178,27 +178,24 @@
 
             <div class="control-panel">
                 <div class="control-group">
-                    <h3>기본 이모티콘</h3>
+                    <h3>이모티콘 빠른 추가</h3>
                     <div class="flex-row">
                         <button onclick="appendEmoji('smile')">😊 :smile: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('heart')">❤️ :heart: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('vip-star')">⭐ :vip-star: <small style="color: #888">(premium)</small></button>
+                        <!-- Grid Emoticons integrated into the main list -->
+                        <button onclick="appendEmoji('grid-1')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153150.png" width="16" height="16" style="vertical-align: middle;"> :grid-1: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('grid-2')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153161.png" width="16" height="16" style="vertical-align: middle;"> :grid-2: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('grid-3')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153152.png" width="16" height="16" style="vertical-align: middle;"> :grid-3: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('grid-4')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153153.png" width="16" height="16" style="vertical-align: middle;"> :grid-4: <small style="color: #888">(basic)</small></button>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>복합 이모티콘 (그리드 샘플)</h3>
+                    <h3>복합 기능 테스트</h3>
                     <div class="flex-row">
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; background: #eee; padding: 8px; border-radius: 8px;">
-                            <button onclick="appendEmoji('grid-1')" title="Top-Left" style="padding: 4px;"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153150.png" width="24" height="24"></button>
-                            <button onclick="appendEmoji('grid-2')" title="Top-Right" style="padding: 4px;"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153151.png" width="24" height="24"></button>
-                            <button onclick="appendEmoji('grid-3')" title="Bottom-Left" style="padding: 4px;"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153152.png" width="24" height="24"></button>
-                            <button onclick="appendEmoji('grid-4')" title="Bottom-Right" style="padding: 4px;"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153153.png" width="24" height="24"></button>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; justify-content: center;">
-                            <button onclick="insertGrid()">2x2 그리드 한꺼번에 삽입</button>
-                            <small style="color: #666;">* 여러 개를 조합하여 큰 이미지나 패턴을 형성할 수 있습니다.</small>
-                        </div>
+                        <button onclick="insertGrid()">2x2 그리드 한꺼번에 삽입</button>
+                        <small style="color: #666; align-self: center;">* 여러 개를 조합하여 큰 이미지나 패턴을 형성할 수 있습니다.</small>
                     </div>
                 </div>
 
