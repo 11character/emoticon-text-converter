@@ -23,6 +23,29 @@ describe('EmoticonTextConverter', () => {
     });
   });
 
+  describe('initialization', () => {
+    it('should throw error if target element is not a div', () => {
+      document.body.innerHTML = '<span id="invalid-editor"></span>';
+      const spanTarget = document.getElementById('invalid-editor') as HTMLElement;
+      expect(() => new EmoticonTextConverter({ target: spanTarget })).toThrow('[EmoticonTextConverter] Target element must be a <div> element.');
+    });
+
+    it('should throw error if target selector does not exist', () => {
+      expect(() => new EmoticonTextConverter({ target: '#non-existent' })).toThrow('[EmoticonTextConverter] Target element not found for selector: #non-existent');
+    });
+
+    it('should initialize with a div element selector', () => {
+      document.body.innerHTML = '<div id="valid-editor"></div>';
+      const divConverter = new EmoticonTextConverter({ target: '#valid-editor' });
+      expect(divConverter.getElement().tagName).toBe('DIV');
+    });
+
+    it('should create a div element if no target is provided', () => {
+      const noTargetConverter = new EmoticonTextConverter();
+      expect(noTargetConverter.getElement().tagName).toBe('DIV');
+    });
+  });
+
   it('should initialize with a target element', () => {
     expect(converter.getElement()).toBe(target);
     expect(target.getAttribute('contenteditable')).toBe('true');

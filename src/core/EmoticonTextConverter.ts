@@ -421,13 +421,19 @@ export class EmoticonTextConverter {
   private initElement(): void {
     if (this.options.target) {
       if (typeof this.options.target === 'string') {
-        this.element = document.querySelector(this.options.target) as HTMLElement;
+        const found = document.querySelector(this.options.target);
+        if (!found) {
+          throw new Error(`[EmoticonTextConverter] Target element not found for selector: ${this.options.target}`);
+        }
+        this.element = found as HTMLElement;
       } else {
         this.element = this.options.target;
       }
-    }
 
-    if (!this.element) {
+      if (this.element.tagName !== 'DIV') {
+        throw new Error('[EmoticonTextConverter] Target element must be a <div> element.');
+      }
+    } else {
       this.element = document.createElement('div');
     }
 
