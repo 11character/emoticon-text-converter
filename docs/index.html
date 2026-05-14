@@ -157,7 +157,7 @@
         .log-type { color: #4ec9b0; font-weight: bold; margin-right: 8px; }
         .log-msg { color: #ce9178; word-break: break-all; }
     </style>
-  <script type="module" crossorigin src="./assets/index-Dfjkypf6.js"></script>
+  <script type="module" crossorigin src="./assets/index-D3vHZ1SM.js"></script>
 </head>
 <body>
     <div class="header">
@@ -183,19 +183,18 @@
                         <button onclick="appendEmoji('smile')">😊 :smile: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('heart')">❤️ :heart: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('vip-star')">⭐ :vip-star: <small style="color: #888">(premium)</small></button>
-                        <!-- Grid Emoticons integrated into the main list -->
-                        <button onclick="appendEmoji('grid-1')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153150.png" width="16" height="16" style="vertical-align: middle;"> :grid-1: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('grid-2')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153161.png" width="16" height="16" style="vertical-align: middle;"> :grid-2: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('grid-3')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153152.png" width="16" height="16" style="vertical-align: middle;"> :grid-3: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('grid-4')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153153.png" width="16" height="16" style="vertical-align: middle;"> :grid-4: <small style="color: #888">(basic)</small></button>
+                        <!-- New Wave and Arrow samples -->
+                        <button onclick="appendEmoji('wave')"><img src="https://cdn-icons-png.flaticon.com/512/10542/10542562.png" width="16" height="16" style="vertical-align: middle;"> :wave: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('arrow-right')"><img src="https://cdn-icons-png.flaticon.com/512/271/271228.png" width="16" height="16" style="vertical-align: middle;"> :arrow-right: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('arrow-up')"><img src="https://cdn-icons-png.flaticon.com/512/271/271218.png" width="16" height="16" style="vertical-align: middle;"> :arrow-up: <small style="color: #888">(basic)</small></button>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>복합 기능 테스트</h3>
+                    <h3>데이터 조작</h3>
                     <div class="flex-row">
-                        <button onclick="insertGrid()">2x2 그리드 한꺼번에 삽입</button>
-                        <small style="color: #666; align-self: center;">* 여러 개를 조합하여 큰 이미지나 패턴을 형성할 수 있습니다.</small>
+                        <button onclick="clearEditor()">내용 비우기</button>
+                        <button onclick="setSampleText()">샘플 텍스트 설정</button>
                     </div>
                 </div>
 

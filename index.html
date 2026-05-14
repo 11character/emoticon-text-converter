@@ -182,19 +182,18 @@
                         <button onclick="appendEmoji('smile')">😊 :smile: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('heart')">❤️ :heart: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('vip-star')">⭐ :vip-star: <small style="color: #888">(premium)</small></button>
-                        <!-- Grid Emoticons integrated into the main list -->
-                        <button onclick="appendEmoji('grid-1')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153150.png" width="16" height="16" style="vertical-align: middle;"> :grid-1: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('grid-2')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153161.png" width="16" height="16" style="vertical-align: middle;"> :grid-2: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('grid-3')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153152.png" width="16" height="16" style="vertical-align: middle;"> :grid-3: <small style="color: #888">(basic)</small></button>
-                        <button onclick="appendEmoji('grid-4')"><img src="https://cdn-icons-png.flaticon.com/512/7153/7153153.png" width="16" height="16" style="vertical-align: middle;"> :grid-4: <small style="color: #888">(basic)</small></button>
+                        <!-- New Wave and Arrow samples -->
+                        <button onclick="appendEmoji('wave')"><img src="https://cdn-icons-png.flaticon.com/512/10542/10542562.png" width="16" height="16" style="vertical-align: middle;"> :wave: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('arrow-right')"><img src="https://cdn-icons-png.flaticon.com/512/271/271228.png" width="16" height="16" style="vertical-align: middle;"> :arrow-right: <small style="color: #888">(basic)</small></button>
+                        <button onclick="appendEmoji('arrow-up')"><img src="https://cdn-icons-png.flaticon.com/512/271/271218.png" width="16" height="16" style="vertical-align: middle;"> :arrow-up: <small style="color: #888">(basic)</small></button>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>복합 기능 테스트</h3>
+                    <h3>데이터 조작</h3>
                     <div class="flex-row">
-                        <button onclick="insertGrid()">2x2 그리드 한꺼번에 삽입</button>
-                        <small style="color: #666; align-self: center;">* 여러 개를 조합하여 큰 이미지나 패턴을 형성할 수 있습니다.</small>
+                        <button onclick="clearEditor()">내용 비우기</button>
+                        <button onclick="setSampleText()">샘플 텍스트 설정</button>
                     </div>
                 </div>
 
@@ -250,11 +249,9 @@
             'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', groups: ['basic', 'premium'] },
             'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', groups: ['basic', 'premium'] },
             'vip-star': { url: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png', groups: ['premium'] },
-            // Grid emoticons
-            'grid-1': { url: 'https://cdn-icons-png.flaticon.com/512/7153/7153150.png', groups: ['basic'] },
-            'grid-2': { url: 'https://cdn-icons-png.flaticon.com/512/7153/7153161.png', groups: ['basic'] },
-            'grid-3': { url: 'https://cdn-icons-png.flaticon.com/512/7153/7153152.png', groups: ['basic'] },
-            'grid-4': { url: 'https://cdn-icons-png.flaticon.com/512/7153/7153153.png', groups: ['basic'] }
+            'wave': { url: 'https://cdn-icons-png.flaticon.com/512/10542/10542562.png', groups: ['basic'] },
+            'arrow-right': { url: 'https://cdn-icons-png.flaticon.com/512/271/271228.png', groups: ['basic'] },
+            'arrow-up': { url: 'https://cdn-icons-png.flaticon.com/512/271/271218.png', groups: ['basic'] }
         };
 
         const config = {
@@ -325,12 +322,6 @@
         // Global functions for UI controls
         window.appendEmoji = (key) => {
             converter.insertText(`:${key}:`);
-        };
-
-        window.insertGrid = () => {
-            // Insert 2x2 grid using line breaks
-            converter.insertText(':grid-1::grid-2:\n:grid-3::grid-4:');
-            addLog('action', '2x2 grid inserted');
         };
 
         // 키 조합 로깅을 위한 이벤트 리스너 추가
