@@ -35,6 +35,7 @@ export interface EmoticonConverterState {
   isDownCtrl: boolean;
   isDownAlt: boolean;
   isDownMeta: boolean;
+  desiredColumn?: number;
 }
 
 export interface HistoryState {

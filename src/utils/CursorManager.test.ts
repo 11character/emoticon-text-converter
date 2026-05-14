@@ -118,4 +118,40 @@ describe('CursorManager', () => {
       }
     });
   });
+
+  describe('getLineInfos', () => {
+    it('단일 줄의 정보를 정확히 반환해야 한다', () => {
+      container.innerHTML = 'Hello';
+      const lines = CursorManager.getLineInfos(container);
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toEqual({ logicalStart: 0, logicalLength: 5 });
+    });
+
+    it('여러 줄의 정보를 정확히 반환해야 한다 (br 포함)', () => {
+      // A<br>BC<br>D<br> 에서 마지막 br은 더미로 처리
+      container.innerHTML = 'A<br>BC<br>D<br>';
+      const lines = CursorManager.getLineInfos(container);
+      expect(lines).toHaveLength(3);
+      expect(lines[0]).toEqual({ logicalStart: 0, logicalLength: 1 }); // 'A'
+      expect(lines[1]).toEqual({ logicalStart: 2, logicalLength: 2 }); // 'BC'
+      expect(lines[2]).toEqual({ logicalStart: 5, logicalLength: 2 }); // 'D' + 더미 br(1)
+    });
+
+    it('이미지가 포함된 줄의 길이를 정확히 계산해야 한다', () => {
+      container.innerHTML = 'A<img src="test.png">B<br>C<br>';
+      const lines = CursorManager.getLineInfos(container);
+      expect(lines).toHaveLength(2);
+      expect(lines[0]).toEqual({ logicalStart: 0, logicalLength: 3 }); // 'A(img)B'
+      expect(lines[1]).toEqual({ logicalStart: 4, logicalLength: 2 }); // 'C' + 더미 br
+    });
+
+    it('연속된 br이 있는 경우 마지막 br만 더미로 처리해야 한다', () => {
+      // A<br><br> (2줄: A줄 + 빈 줄)
+      container.innerHTML = 'A<br><br>';
+      const lines = CursorManager.getLineInfos(container);
+      expect(lines).toHaveLength(2);
+      expect(lines[0].logicalLength).toBe(1); // 'A'
+      expect(lines[1].logicalLength).toBe(1); // 빈 줄의 더미 br
+    });
+  });
 });

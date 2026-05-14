@@ -149,6 +149,14 @@ export class EmoticonTextConverter {
   }
 
   /**
+   * 현재 설정된 옵션을 반환합니다.
+   * @returns {EmoticonTextConverterOptions}
+   */
+  public getOptions(): EmoticonTextConverterOptions {
+    return { ...this.options };
+  }
+
+  /**
    * 엔터키 입력 시 줄바꿈 비활성화 여부를 설정합니다.
    * @param {boolean} disable 
    */
@@ -235,6 +243,7 @@ export class EmoticonTextConverter {
   public setText(text: string): void {
     this.state.text = text;
     this.element.innerHTML = this.parser.toHtml(text);
+    this.updateEmptyState();
     this.options.onInput?.(text);
     this.pushHistory(false);
   }
@@ -245,6 +254,7 @@ export class EmoticonTextConverter {
   public clear(): void {
     this.element.innerHTML = '';
     this.state.text = '';
+    this.updateEmptyState();
     this.options.onInput?.('');
     this.pushHistory(false);
   }
@@ -438,6 +448,8 @@ export class EmoticonTextConverter {
     }
 
     this.applyReadonlyState();
+    this.element.classList.add(`${this.options.classPrefix}container`);
+    this.updateEmptyState();
     this.element.style.outline = 'none';
     this.element.style.overflowWrap = 'anywhere'; // break-all equivalent
   }
@@ -531,11 +543,56 @@ export class EmoticonTextConverter {
       this.options.onFocus?.();
     });
     el.addEventListener('blur', () => {
+      this.state.desiredColumn = undefined;
       this.options.onBlur?.();
+    });
+    el.addEventListener('mouseup', () => {
+      this.state.desiredColumn = undefined;
     });
     el.addEventListener('compositionend', () => {
       this.state.isComposition = true;
     });
+  }
+
+  /**
+   * 상하 방향키 입력을 처리합니다.
+   */
+  private handleVerticalMovement(e: KeyboardEvent): void {
+    e.preventDefault();
+
+    const currentPos = CursorManager.getCursorPosition(this.element);
+    const lineInfos = CursorManager.getLineInfos(this.element);
+
+    // 현재 위치가 어느 줄의 몇 번째 칸인지 계산
+    let currentLineIdx = 0;
+    let currentCol = 0;
+
+    for (let i = 0; i < lineInfos.length; i++) {
+      const line = lineInfos[i];
+      if (currentPos >= line.logicalStart && currentPos <= line.logicalStart + line.logicalLength) {
+        currentLineIdx = i;
+        currentCol = currentPos - line.logicalStart;
+        break;
+      }
+    }
+
+    // 목표 컬럼 설정 (연속 이동 시 유지됨)
+    if (this.state.desiredColumn === undefined) {
+      this.state.desiredColumn = currentCol;
+    }
+
+    const isUp = e.key === 'ArrowUp';
+    const targetLineIdx = isUp ? currentLineIdx - 1 : currentLineIdx + 1;
+
+    if (targetLineIdx >= 0 && targetLineIdx < lineInfos.length) {
+      const targetLine = lineInfos[targetLineIdx];
+      // 타겟 라인의 길이가 목표 컬럼보다 짧으면 라인 끝으로 이동
+      const targetCol = Math.min(this.state.desiredColumn, targetLine.logicalLength);
+      const targetPos = targetLine.logicalStart + targetCol;
+
+      CursorManager.setCursorPosition(this.element, targetPos);
+    }
+    // 첫 줄에서 위로 가거나 마지막 줄에서 아래로 가는 경우는 무시 (기존 위치 유지)
   }
 
   private onKeyDown(e: KeyboardEvent): void {
@@ -565,6 +622,17 @@ export class EmoticonTextConverter {
       e.preventDefault();
       this.redo();
       return;
+    }
+
+    // ArrowUp / ArrowDown: 커스텀 논리적 줄 이동
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      this.handleVerticalMovement(e);
+      return;
+    }
+
+    // 다른 키 입력 시 목표 컬럼 초기화 (Shift 등 제어키 제외)
+    if (!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) {
+      this.state.desiredColumn = undefined;
     }
 
     if (e.key === 'Enter') {
@@ -636,15 +704,25 @@ export class EmoticonTextConverter {
     const newPos = this.getExpectedLogicalLength(textBefore);
 
     this.element.innerHTML = this.parser.toHtml(text);
-    
+    this.updateEmptyState();
+
     // 보정된 위치로 커서 복구
     CursorManager.setCursorPosition(this.element, newPos);
-    
+
     this.state.isConverting = false;
     this.options.onInput?.(text);
     this.pushHistory(false);
   }
 
+  private updateEmptyState(): void {
+    if (!this.element) return;
+    const text = this.getText();
+    if (text === '') {
+      this.element.classList.add(`${this.options.classPrefix}empty`);
+    } else {
+      this.element.classList.remove(`${this.options.classPrefix}empty`);
+    }
+  }
   private insertLineBreak(): void {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;

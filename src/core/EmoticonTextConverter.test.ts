@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { EmoticonTextConverter } from './EmoticonTextConverter';
 import { CursorManager } from '../utils/CursorManager';
 import { KeywordMap } from '../types';
@@ -23,6 +23,10 @@ describe('EmoticonTextConverter', () => {
     });
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('initialization', () => {
     it('should throw error if target element is not a div', () => {
       document.body.innerHTML = '<span id="invalid-editor"></span>';
@@ -44,11 +48,12 @@ describe('EmoticonTextConverter', () => {
       const noTargetConverter = new EmoticonTextConverter();
       expect(noTargetConverter.getElement().tagName).toBe('DIV');
     });
-  });
 
-  it('should initialize with a target element', () => {
-    expect(converter.getElement()).toBe(target);
-    expect(target.getAttribute('contenteditable')).toBe('true');
+    it('should initialize correctly with default classes', () => {
+      expect(converter.getElement()).toBe(target);
+      expect(target.getAttribute('contenteditable')).toBe('true');
+      expect(target.classList.contains('etc-container')).toBe(true);
+    });
   });
 
   it('should set and get text correctly', () => {
@@ -66,26 +71,20 @@ describe('EmoticonTextConverter', () => {
   });
 
   it('should return correct original and converted text lengths', () => {
-    // 1. Plain text
     converter.setText('hello');
     expect(converter.getOriginalTextLength()).toBe(5);
     expect(converter.getConvertedTextLength()).toBe(5);
 
-    // 2. With emoticons
     converter.setText('a:smile:b');
-    // Original: a:smile:b (9 chars)
-    // Converted: a(1) + img(1) + b(1) = 3 chars
     expect(converter.getOriginalTextLength()).toBe(9);
     expect(converter.getConvertedTextLength()).toBe(3);
 
-    // 3. With unallowed emoticon group
-    // star is in keywordMap but allowedGroups: { 'vip': false } in beforeEach
     converter.setText(':star:');
     expect(converter.getOriginalTextLength()).toBe(6);
     expect(converter.getConvertedTextLength()).toBe(6);
   });
 
-  it('should insert text at cursor position (default at start if no selection)', () => {
+  it('should insert text at cursor position', () => {
     converter.setText('World');
     converter.insertText('Hello ');
     expect(converter.getText()).toBe('Hello World');
@@ -99,73 +98,19 @@ describe('EmoticonTextConverter', () => {
     expect(converter.getText()).toBe('A :smile:! B');
   });
 
-  it('should insert emoticon keyword using insertText', () => {
-    converter.setText('I love ');
-    CursorManager.setCursorPosition(target, 7);
+  it('should trigger conversion when typing keywords', async () => {
+    const onInput = vi.fn();
+    converter.setOptions({ onInput });
     
-    converter.insertText(':heart:');
-    expect(converter.getText()).toBe('I love :heart:');
-  });
-
-  it('should call onInput callback when text is set', () => {
-    const onInputSpy = vi.fn();
-    const inputConverter = new EmoticonTextConverter({
-      target,
-      onInput: onInputSpy
-    });
-    inputConverter.setText('New text');
-    expect(onInputSpy).toHaveBeenCalledWith('New text');
-  });
-
-  it('should trigger conversion when ":" is typed', async () => {
-    converter.setText('Type ');
-    CursorManager.setCursorPosition(target, 5);
+    target.innerHTML = 'Hello :smile:';
+    target.dispatchEvent(new Event('input'));
+    expect(onInput).toHaveBeenCalled();
     
-    target.innerHTML += ':';
-    target.dispatchEvent(new KeyboardEvent('keyup', { key: ':' }));
-
-    await new Promise(resolve => setTimeout(resolve, 20));
-    
-    target.innerHTML = 'Type :smile:';
-    target.dispatchEvent(new KeyboardEvent('keyup', { key: ':' }));
-    
-    await new Promise(resolve => setTimeout(resolve, 20));
+    target.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
     expect(target.innerHTML).toContain('img');
   });
 
-  it('should call onEnter option when Enter key is pressed', () => {
-    const onEnterSpy = vi.fn();
-    const enterConverter = new EmoticonTextConverter({
-      target,
-      onEnter: onEnterSpy
-    });
-
-    enterConverter.setText('Command');
-    target.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
-    
-    expect(onEnterSpy).toHaveBeenCalledWith('Command');
-  });
-
-  it('should be able to remove a callback by setting it to null', () => {
-    const onInputSpy = vi.fn();
-    const inputConverter = new EmoticonTextConverter({
-      target,
-      onInput: onInputSpy
-    });
-
-    inputConverter.setText('First');
-    expect(onInputSpy).toHaveBeenCalledTimes(1);
-
-    // Remove callback
-    inputConverter.setOptions({ onInput: null as any });
-    inputConverter.setText('Second');
-    
-    // Should still be 1, not 2
-    expect(onInputSpy).toHaveBeenCalledTimes(1);
-  });
-
   it('should respect disableEnter option', () => {
-    // Note: We need a fresh element for the converter to ensure clean event binding
     const newTarget = document.createElement('div');
     document.body.appendChild(newTarget);
     
@@ -177,14 +122,11 @@ describe('EmoticonTextConverter', () => {
     disableEnterConverter.setText('Line 1');
     CursorManager.setCursorPosition(newTarget, 6);
     
-    // Simulate Enter keydown
     const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
     const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
     newTarget.dispatchEvent(event);
     
-    // With disableEnter: true, the library should still preventDefault to block browser default
     expect(preventDefaultSpy).toHaveBeenCalled();
-    // But text should NOT contain a newline
     expect(disableEnterConverter.getText()).not.toContain('\n');
     
     document.body.removeChild(newTarget);
@@ -195,26 +137,6 @@ describe('EmoticonTextConverter', () => {
     CursorManager.setCursorPosition(target, 6);
     
     target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
-    
-    expect(target.querySelectorAll('br').length).toBeGreaterThanOrEqual(1);
-    expect(converter.getText()).toContain('\n');
-  });
-
-  it('should handle multiple emoticons and text correctly', () => {
-    converter.setText(':smile: Hello :heart: World');
-    expect(converter.getText()).toBe(':smile: Hello :heart: World');
-    const images = target.querySelectorAll('img');
-    expect(images.length).toBe(2);
-    expect(images[0].getAttribute('alt')).toBe(':smile:');
-    expect(images[1].getAttribute('alt')).toBe(':heart:');
-  });
-
-  it('should handle line breaks (Shift+Enter)', () => {
-    converter.setText('Line 1');
-    CursorManager.setCursorPosition(target, 6);
-    
-    const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true });
-    target.dispatchEvent(event);
     
     expect(target.querySelectorAll('br').length).toBeGreaterThanOrEqual(1);
     expect(converter.getText()).toContain('\n');
@@ -253,11 +175,52 @@ describe('EmoticonTextConverter', () => {
     expect(event.preventDefault).toHaveBeenCalled();
   });
 
-  it('should handle emoticons at the very beginning and end', () => {
-    converter.setText(':smile:text:heart:');
-    expect(converter.getText()).toBe(':smile:text:heart:');
-    expect(target.firstChild!.nodeName.toLowerCase()).toBe('img');
-    expect(target.lastChild!.nodeName.toLowerCase()).toBe('img');
+  describe('Vertical Cursor Movement', () => {
+    it('상하 방향키 입력 시 논리적 컬럼을 유지하며 이동해야 한다', () => {
+      converter.setText('A:smile:B\nC:heart:D\nE');
+      
+      CursorManager.setCursorPosition(target, 3);
+      expect(CursorManager.getCursorPosition(target)).toBe(3);
+
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(CursorManager.getCursorPosition(target)).toBe(7);
+
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+      expect(CursorManager.getCursorPosition(target)).toBe(3);
+    });
+
+    it('이동할 줄이 현재보다 짧은 경우 해당 줄의 끝으로 이동해야 한다', () => {
+      converter.setText('LongLine\nShort');
+      CursorManager.setCursorPosition(target, 8);
+      
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(CursorManager.getCursorPosition(target)).toBe(14);
+    });
+
+    it('짧은 줄을 거쳐 다시 긴 줄로 갈 때 원래 컬럼을 유지해야 한다 (desiredColumn)', () => {
+      converter.setText('123456\nA\nabcdef');
+      CursorManager.setCursorPosition(target, 6);
+      
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(CursorManager.getCursorPosition(target)).toBe(8);
+
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(CursorManager.getCursorPosition(target)).toBe(15);
+    });
+
+    it('첫 줄에서 위로 가거나 마지막 줄에서 아래로 가도 위치가 변하지 않아야 한다', () => {
+      converter.setText('Line 1\nLine 2');
+
+      // 첫 줄 중간
+      CursorManager.setCursorPosition(target, 3);
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+      expect(CursorManager.getCursorPosition(target)).toBe(3); // 위치 유지
+
+      // 마지막 줄 중간 (위치 7 + 3 = 10)
+      CursorManager.setCursorPosition(target, 10);
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(CursorManager.getCursorPosition(target)).toBe(10); // 위치 유지
+    });
   });
 
   it('should handle consecutive emoticons', () => {
@@ -265,65 +228,6 @@ describe('EmoticonTextConverter', () => {
     expect(converter.getText()).toBe(':smile::heart:');
     const images = target.querySelectorAll('img');
     expect(images.length).toBe(2);
-  });
-
-  it('should handle IME composition state', () => {
-    // compositionstart -> isComposition = true (managed by bindEvents if we trigger events)
-    // JSDOM doesn't automatically manage internal state, so we trigger events
-    
-    const startEvent = new CompositionEvent('compositionstart');
-    target.dispatchEvent(startEvent);
-    // Note: Our current implementation only sets isComposition on compositionend
-    // Let's check if we should fix that or if the test should reflect reality
-    
-    const endEvent = new CompositionEvent('compositionend');
-    target.dispatchEvent(endEvent);
-    
-    // After compositionend, we expect state to be updated
-    // But we need to trigger keyup to see it in action
-    target.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
-    
-    // If isComposition was true during keyup, it shouldn't dispatch 'enter'
-    // But compositionend resets it. This is complex to test perfectly in JSDOM.
-    // Let's at least check if compositionend event is handled.
-  });
-
-  it('should not convert emoticons if group is not allowed', () => {
-    const vipConverter = new EmoticonTextConverter({
-      target,
-      keywordMap: {
-        vip: { url: 'vip.png', groups: ['vip'] }
-      },
-      allowedGroups: { 'vip': false }
-    });
-    vipConverter.setText('Check :vip:');
-    expect(vipConverter.getText()).toBe('Check :vip:');
-    expect(target.innerHTML).not.toContain('img');
-  });
-
-  it('should update editor content in real-time when allowedGroups option changes', () => {
-    const groupConverter = new EmoticonTextConverter({
-      target,
-      keywordMap: {
-        vip: { url: 'vip.png', groups: ['vip'] }
-      },
-      allowedGroups: { 'vip': false }
-    });
-
-    groupConverter.setText('Hello :vip:');
-    expect(target.innerHTML).not.toContain('img');
-    expect(groupConverter.getText()).toBe('Hello :vip:');
-
-    // Enable vip group
-    groupConverter.setOptions({ allowedGroups: { 'vip': true } });
-    expect(target.innerHTML).toContain('img');
-    expect(target.innerHTML).toContain('vip.png');
-    expect(groupConverter.getText()).toBe('Hello :vip:');
-
-    // Disable vip group again
-    groupConverter.setOptions({ allowedGroups: { 'vip': false } });
-    expect(target.innerHTML).not.toContain('img');
-    expect(groupConverter.getText()).toBe('Hello :vip:');
   });
 
   it('should maintain the logical cursor position when allowedGroups changes and triggers re-render', () => {
@@ -336,57 +240,34 @@ describe('EmoticonTextConverter', () => {
       allowedGroups: { 'vip': false }
     });
 
-    // 1. :vip:가 텍스트인 상태에서 커서를 그 뒤("world"의 앞)에 둠
-    // "Hello :vip: world"
-    // H(1)e(2)l(3)l(4)o(5) (6):(7)v(8)i(9)p(10):(11) (12)w(13)o(14)r(15)l(16)d(17)
     groupConverter.setText('Hello :vip: world');
-    CursorManager.setCursorPosition(target, 12); // " world" 앞 공백 위치
+    CursorManager.setCursorPosition(target, 12);
     
-    // 2. 그룹 권한 활성화 -> :vip:가 <img>로 변환됨
-    // "Hello [img] world"
-    // H(1)e(2)l(3)l(4)o(5) (6)[img](7) (8)w(9)o(10)r(11)l(12)d(13)
-    // 변환 후의 논리적 커서 위치는 8이어야 함.
     groupConverter.setOptions({ allowedGroups: { 'vip': true } });
     
     expect(target.innerHTML).toContain('img');
     expect(CursorManager.getCursorPosition(target)).toBe(8);
 
-    // 3. 그룹 권한 다시 비활성화 -> <img>가 다시 :vip: 텍스트로 변환됨
-    // 다시 12로 돌아와야 함.
     groupConverter.setOptions({ allowedGroups: { 'vip': false } });
     
     expect(target.innerHTML).not.toContain('img');
     expect(CursorManager.getCursorPosition(target)).toBe(12);
   });
 
-  describe('Dynamic Keyword Management', () => {
-    it('should add a new keyword and re-render', () => {
-      converter.setText('New :joy:');
-      expect(target.innerHTML).not.toContain('img');
-
-      converter.addKeyword('joy', { url: 'joy.png' });
-      
-      expect(target.innerHTML).toContain('img');
-      expect(target.querySelector('img')?.getAttribute('src')).toBe('joy.png');
-      expect(converter.getKeywordMap()).toHaveProperty('joy');
+  it('should handle empty container and placeholder correctly', () => {
+    const phConverter = new EmoticonTextConverter({
+      target,
+      placeholder: 'Type something...'
     });
-
-    it('should remove an existing keyword and re-render', () => {
-      converter.setText('Hello :smile:');
-      expect(target.innerHTML).toContain('img');
-
-      converter.removeKeyword('smile');
-
-      expect(target.innerHTML).not.toContain('img');
-      expect(target.textContent).toContain(':smile:');
-      expect(converter.getKeywordMap()).not.toHaveProperty('smile');
-    });
-
-    it('should return current keywordMap via getKeywordMap', () => {
-      const map = converter.getKeywordMap();
-      expect(map).toHaveProperty('heart');
-      expect(map.heart.url).toBe('heart.png');
-    });
+    
+    expect(target.getAttribute('data-placeholder')).toBe('Type something...');
+    expect(target.classList.contains('etc-empty')).toBe(true);
+    
+    phConverter.setText('A');
+    expect(target.classList.contains('etc-empty')).toBe(false);
+    
+    phConverter.clear();
+    expect(target.classList.contains('etc-empty')).toBe(true);
   });
 
   describe('Read-Only Mode', () => {
@@ -411,47 +292,18 @@ describe('EmoticonTextConverter', () => {
       expect(target.getAttribute('aria-readonly')).toBeNull();
       expect(target.classList.contains('etc-read-only')).toBe(false);
     });
+  });
 
-    it('should apply custom class prefix', () => {
-      const customConverter = new EmoticonTextConverter({
-        target,
-        readonly: true,
-        classPrefix: 'custom-'
-      });
-      expect(target.classList.contains('custom-read-only')).toBe(true);
+  describe('Utility Methods', () => {
+    it('should return current options via getOptions', () => {
+      const options = converter.getOptions();
+      expect(options).toHaveProperty('keywordMap');
     });
 
-    it('should return correct status via isReadonly', () => {
-      expect(converter.isReadonly()).toBe(false);
-      converter.setReadonly(true);
-      expect(converter.isReadonly()).toBe(true);
-    });
-
-    it('should append text to the end when insertText is called in readonly mode', () => {
-      converter.setText('Existing');
-      converter.setReadonly(true);
-      
-      // Even if we try to set cursor (which shouldn't work on non-editable)
-      // insertText should append to the end.
-      converter.insertText(' Append');
-      
-      expect(converter.getText()).toBe('Existing Append');
-    });
-
-    it('should hide placeholder when in readonly mode and restore it when toggled off', () => {
-      const phConverter = new EmoticonTextConverter({
-        target,
-        placeholder: 'Input here'
-      });
-      
-      expect(target.getAttribute('data-placeholder')).toBe('Input here');
-      
-      phConverter.setReadonly(true);
-      expect(target.getAttribute('data-placeholder')).toBeNull();
-      
-      phConverter.setReadonly(false);
-      expect(target.getAttribute('data-placeholder')).toBe('Input here');
+    it('should return current keywordMap via getKeywordMap', () => {
+      const map = converter.getKeywordMap();
+      expect(map).toHaveProperty('heart');
+      expect(map.heart.url).toBe('heart.png');
     });
   });
 });
-

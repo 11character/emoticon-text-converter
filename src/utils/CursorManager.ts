@@ -118,6 +118,63 @@ export class CursorManager {
   }
 
   /**
+   * 요소 내의 줄 정보를 반환합니다. (<br> 기준)
+   * 마지막에 위치한 더미 <br>은 새로운 줄을 생성하지 않도록 처리합니다.
+   * @param {HTMLElement} element 
+   * @returns {{ logicalStart: number, logicalLength: number }[]}
+   */
+  static getLineInfos(element: HTMLElement): { logicalStart: number; logicalLength: number }[] {
+    const lines: { logicalStart: number; logicalLength: number }[] = [];
+    let currentLogicalStart = 0;
+    let currentLogicalLength = 0;
+
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+      {
+        acceptNode: (node) => {
+          const name = node.nodeName.toLowerCase();
+          if (node.nodeType === Node.TEXT_NODE || name === 'img' || name === 'br') {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_SKIP;
+        }
+      }
+    );
+
+    const nodes: Node[] = [];
+    let currentNode: Node | null;
+    while ((currentNode = walker.nextNode())) {
+      nodes.push(currentNode);
+    }
+
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (node.nodeType === Node.TEXT_NODE) {
+        currentLogicalLength += (node as Text).nodeValue?.length || 0;
+      } else if (node.nodeName.toLowerCase() === 'img') {
+        currentLogicalLength += 1;
+      } else if (node.nodeName.toLowerCase() === 'br') {
+        // 마지막 노드가 br인 경우, 브라우저가 시각적 렌더링을 위해 추가한 더미 태그입니다.
+        // 이 경우 새로운 줄을 만들지 않고 현재 줄의 길이에 포함시킵니다.
+        if (i === nodes.length - 1) {
+          currentLogicalLength += 1;
+        } else {
+          // 현재 줄 정보를 저장하고 새 줄 시작
+          lines.push({ logicalStart: currentLogicalStart, logicalLength: currentLogicalLength });
+          currentLogicalStart += currentLogicalLength + 1; // +1은 br 자체의 길이
+          currentLogicalLength = 0;
+        }
+      }
+    }
+
+    // 마지막 줄 추가
+    lines.push({ logicalStart: currentLogicalStart, logicalLength: currentLogicalLength });
+    
+    return lines;
+  }
+
+  /**
    * 특정 논리적 위치로 커서를 이동시킵니다.
    * @param {HTMLElement} el - 대상 요소
    * @param {number} offset - 이동할 논리적 위치
