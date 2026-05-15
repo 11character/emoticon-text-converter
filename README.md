@@ -2,9 +2,24 @@
 
 # Emoticon Text Converter
 
-A universal library that converts text keywords (e.g., `:smile:`) into emoticon images in real-time using `contenteditable` elements. Fully supports **TypeScript** and works in pure JavaScript environments.
+[![ko-fi](./assets/kofi-button-en.svg)](https://ko-fi.com/11character)
 
-[**🚀 Check out the Live Demo**](https://11character.github.io/emoticon-text-converter/)
+A **lightweight, zero-dependency** TypeScript library that transforms text keywords (e.g., `:smile:`) into visual emoticon images in real-time. Built specifically for modern web interfaces requiring rich text input without the overhead of heavy editors.
+
+### 🚀 Optimized for Real-time Interactions
+This library is the perfect choice for developers building:
+- **Real-time Chat Applications**: Seamlessly convert symbols to emoticons as users type.
+- **Dynamic Comment Systems**: Enhance user engagement in community or blog comment sections.
+- **Customer Support Tools**: Improve clarity in live dashbaords and help desks.
+- **Social Media Platforms**: Provide a familiar, rich input experience for status updates.
+
+### 💎 Why Emoticon Text Converter?
+- **Flawless Cursor Management**: Unlike simple `innerHTML` replacements, our `CursorManager` ensures the cursor never jumps, even during complex DOM updates.
+- **High Performance & Scalability**: Optimized with $O(1)$ lookup for both keywords and permissions, ensuring stable performance even with large-scale keyword maps. Uses an efficient `TreeWalker` for minimal DOM traversal.
+- **Privacy & Security**: Built-in XSS protection and secure drop event handling.
+- **Framework Agnostic**: Works perfectly with React, Vue, Angular, or pure Vanilla JS.
+
+[**🔗 Check out the Live Demo**](https://11character.github.io/emoticon-text-converter/)
 
 ## Key Features
 

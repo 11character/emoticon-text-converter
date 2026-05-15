@@ -1,6 +1,6 @@
 {
   "name": "emoticon-text-converter",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A vanilla JavaScript library for converting emoticon keywords to HTML images in contenteditable elements.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

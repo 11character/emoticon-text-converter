@@ -1,0 +1,11 @@
+<svg width="170" height="45" viewBox="0 0 170 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Right/Bottom Shadow for 3D effect -->
+  <rect x="5" y="5" width="160" height="35" fill="#1a87b3" rx="2"/>
+  <!-- Main Button Body -->
+  <rect x="2" y="2" width="160" height="35" fill="#29abe0" rx="2"/>
+  <!-- Ko-fi Icon & Text -->
+  <g transform="translate(20, 12)">
+    <path d="M2.5 0C1.1193 0 0 1.1193 0 2.5V10.5C0 11.8807 1.1193 13 2.5 13H10.5C11.8807 13 13 11.8807 13 10.5V8H14.5C15.8807 8 17 6.8807 17 5.5V2.5C17 1.1193 15.8807 0 14.5 0H2.5ZM13 2.5V5.5H14.5V2.5H13ZM2.5 2.5H10.5V10.5H2.5V2.5Z" fill="white"/>
+    <text x="24" y="11" fill="white" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="13px" letter-spacing="1px">SUPPORT ME</text>
+  </g>
+</svg>
