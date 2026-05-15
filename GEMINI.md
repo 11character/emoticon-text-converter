@@ -19,7 +19,14 @@
 2. **구현 및 검증**: 코드 수정 후 `npm test`를 실행하여 기존 기능의 회귀 여부를 확인한다.
 3. **데모 확인**: 시각적 확인이 필요한 경우 `index.html`과 `npm run dev`를 활용하여 실제 동작을 검증한다.
 4. **마무리 (Status Sync)**: 작업 결과를 커밋하기 전 `STATUS.md`를 업데이트하여 현재 상태를 동기화한다.
-
-## 4. 버전 관리 (Version Management)
+## 4. 버전 관리 및 배포 (Version Management & Deployment)
 - **자율적 마이너 버전 관리**: 마이너 버전(`x.Y.z`) 및 패치 버전(`x.y.Z`) 업데이트는 사용자의 명시적 요청 없이도 에이전트가 기능의 중요도에 따라 판단하여 자율적으로 수행하고 `package.json` 및 Git Tag를 갱신한다.
 - **SemVer 준수**: 기능 추가 시 마이너 버전, 버그 수정 시 패치 버전을 올리는 유의적 버전 정책을 따른다.
+- **표준 배포 워크플로우**: 사용자가 "배포"를 요청할 경우 다음 단계를 순차적으로 수행한다:
+    1. 빌드 (`npm run build && npm run build:demo`)
+    2. 상태 업데이트 (`STATUS.md` 갱신 및 버전 명시)
+    3. 버전 범프 (`package.json`)
+    4. 깃 커밋 및 태그 생성 (`git add`, `git commit`, `git tag`)
+    5. 원격 푸시 (`git push origin master --tags`)
+    6. NPM 배포 (`npm publish`)
+---
