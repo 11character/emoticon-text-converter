@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,10 +20,41 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             z-index: 10;
         }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         h1 {
             font-size: 18px;
             margin: 0;
             color: #1c1e21;
+        }
+        .lang-switcher {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .lang-btn {
+            background: none;
+            border: 1px solid transparent;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #65676b;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .lang-btn:hover {
+            background: #f2f2f2;
+        }
+        .lang-btn.active {
+            background: #ebf5ff;
+            border-color: #1877f2;
+            color: #1877f2;
+            font-weight: 600;
         }
         .main-container {
             display: flex;
@@ -70,7 +101,7 @@
             border-color: #1877f2;
         }
         #readonly-container {
-            border: 2px solid #ff9800; /* Different border color */
+            border: 2px solid #ff9800;
             border-radius: 8px;
             padding: 16px;
             min-height: 40px;
@@ -90,10 +121,13 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         .control-group {
-            margin-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .control-group:last-child {
+            margin-bottom: 0;
         }
         .control-group h3 {
-            font-size: 14px;
+            font-size: 13px;
             margin: 0 0 12px 0;
             color: #65676b;
             text-transform: uppercase;
@@ -160,24 +194,35 @@
 </head>
 <body>
     <div class="header">
-        <h1>Emoticon Text Converter Playground</h1>
+        <div class="header-content">
+            <h1 data-i18n="header_title">Emoticon Text Converter Playground</h1>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="lang-switcher">
+                    <button onclick="changeLanguage('en')" id="lang-en" class="lang-btn active">English</button>
+                    <button onclick="changeLanguage('ko')" id="lang-ko" class="lang-btn">한국어</button>
+                </div>
+                <a id="kofi-link" href="https://ko-fi.com/11character" target="_blank">
+                    <img id="kofi-img" src="./assets/kofi-button-en.svg" alt="Support me on Ko-fi" style="height: 36px; vertical-align: middle;">
+                </a>
+            </div>
+        </div>
     </div>
     
     <div class="main-container">
         <div class="left-panel">
             <div class="editor-section">
-                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;">읽기 전용 뷰어 (실시간 반영)</span>
+                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;" data-i18n="readonly_label">Read-only Viewer (Real-time)</span>
                 <div id="readonly-container"></div>
             </div>
 
             <div class="editor-section">
-                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;">에디터 입력</span>
+                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;" data-i18n="editor_label">Editor Input</span>
                 <div id="editor-container"></div>
             </div>
 
             <div class="control-panel">
                 <div class="control-group">
-                    <h3>이모티콘 빠른 추가</h3>
+                    <h3 data-i18n="quick_add_title">Quick Add Emoticons</h3>
                     <div class="flex-row">
                         <button onclick="appendEmoji('smile')">😊 :smile: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('heart')">❤️ :heart: <small style="color: #888">(basic, premium)</small></button>
@@ -189,44 +234,36 @@
                 </div>
 
                 <div class="control-group">
-                    <h3>데이터 조작</h3>
+                    <h3 data-i18n="data_manip_title">Data Manipulation</h3>
                     <div class="flex-row">
-                        <button onclick="clearEditor()">내용 비우기</button>
-                        <button onclick="setSampleText()">모든 이모티콘 포함 샘플 설정</button>
+                        <button onclick="clearEditor()" data-i18n="clear_btn">Clear Content</button>
+                        <button onclick="setSampleText()" data-i18n="sample_btn">Set Sample Text</button>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>허용 그룹 설정 (allowedGroups)</h3>
+                    <h3 data-i18n="groups_title">Allowed Groups Settings (allowedGroups)</h3>
                     <div class="flex-row">
                         <label class="toggle-item">
-                            <input type="checkbox" checked onchange="toggleGroup('basic', this.checked)"> basic (기본)
+                            <input type="checkbox" checked onchange="toggleGroup('basic', this.checked)"> <span data-i18n="group_basic">basic (Default)</span>
                         </label>
                         <label class="toggle-item">
-                            <input type="checkbox" onchange="toggleGroup('premium', this.checked)"> premium (프리미엄)
+                            <input type="checkbox" onchange="toggleGroup('premium', this.checked)"> <span data-i18n="group_premium">premium (Premium)</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>기능 옵션</h3>
+                    <h3 data-i18n="options_title">Feature Options</h3>
                     <div class="flex-row">
                         <label class="toggle-item">
-                            <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> 엔터 줄바꿈 비활성화 (Shift+Enter는 허용)
+                            <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> <span data-i18n="option_disable_enter">Disable Enter for New Line (Shift+Enter allowed)</span>
                         </label>
                         <label class="toggle-item" style="margin-left: 12px; display: flex; align-items: center; gap: 8px;">
-                            <span>이모티콘 크기:</span>
+                            <span data-i18n="option_size_label">Emoticon Size:</span>
                             <input type="range" min="16" max="64" value="24" oninput="toggleOption('emoticonSize', parseInt(this.value)); document.getElementById('size-display').textContent = this.value + 'px';">
                             <span id="size-display" style="min-width: 40px;">24px</span>
                         </label>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <h3>데이터 조작</h3>
-                    <div class="flex-row">
-                        <button onclick="clearEditor()">내용 비우기</button>
-                        <button onclick="setSampleText()">샘플 텍스트 설정</button>
                     </div>
                 </div>
             </div>
@@ -244,6 +281,45 @@
     <script type="module">
         import { EmoticonTextConverter } from './src/index.ts';
 
+        const TRANSLATIONS = {
+            en: {
+                header_title: "Emoticon Text Converter Playground",
+                readonly_label: "Read-only Viewer (Real-time)",
+                editor_label: "Editor Input",
+                quick_add_title: "Quick Add Emoticons",
+                data_manip_title: "Data Manipulation",
+                clear_btn: "Clear Content",
+                sample_btn: "Set Sample Text",
+                groups_title: "Allowed Groups Settings (allowedGroups)",
+                group_basic: "basic (Default)",
+                group_premium: "premium (Premium)",
+                options_title: "Feature Options",
+                option_disable_enter: "Disable Enter for New Line (Shift+Enter allowed)",
+                option_size_label: "Emoticon Size:",
+                placeholder: "Type a message...",
+                sample_text: "Hello! Trying out all emoticons.\n{keys}\nTest it out with different group permissions!"
+            },
+            ko: {
+                header_title: "이모티콘 텍스트 변환기 플레이그라운드",
+                readonly_label: "읽기 전용 뷰어 (실시간 반영)",
+                editor_label: "에디터 입력",
+                quick_add_title: "이모티콘 빠른 추가",
+                data_manip_title: "데이터 조작",
+                clear_btn: "내용 비우기",
+                sample_btn: "샘플 텍스트 설정",
+                groups_title: "허용 그룹 설정 (allowedGroups)",
+                group_basic: "basic (기본)",
+                group_premium: "premium (프리미엄)",
+                options_title: "기능 옵션",
+                option_disable_enter: "엔터 줄바꿈 비활성화 (Shift+Enter는 허용)",
+                option_size_label: "이모티콘 크기:",
+                placeholder: "메시지를 입력하세요...",
+                sample_text: "안녕하세요! 모든 이모티콘을 사용해봅니다.\n{keys}\n다양한 그룹 권한과 함께 테스트해보세요!"
+            }
+        };
+
+        let currentLang = 'en';
+
         const keywordMap = {
             'smile': { url: 'https://cdn-icons-png.flaticon.com/512/1933/1933691.png', groups: ['basic', 'premium'] },
             'heart': { url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', groups: ['basic', 'premium'] },
@@ -257,7 +333,7 @@
             target: '#editor-container',
             keywordMap,
             emoticonSize: 24,
-            placeholder: '메시지를 입력하세요...',
+            placeholder: TRANSLATIONS[currentLang].placeholder,
             allowedGroups: { basic: true, premium: false },
             disableEnter: false,
             onEnter: (text) => {
@@ -270,8 +346,6 @@
                     
                     const meta = `<span class="log-meta">[Len: ${prevTextLen} -> ${currentLen}] [Pos: ${prevCursorPos} -> ${currentPos}]</span>`;
                     addLog('onInput', `${meta} Text: "${text}"`);
-                    
-                    console.log(`[Input Change] Len: ${prevTextLen}->${currentLen}, Pos: ${prevCursorPos}->${currentPos}, Text: "${text}"`);
                     
                     prevCursorPos = currentPos;
                     prevTextLen = currentLen;
@@ -287,7 +361,6 @@
 
         const converter = new EmoticonTextConverter(config);
         
-        // Read-only viewer initialization
         const viewer = new EmoticonTextConverter({
             target: '#readonly-container',
             keywordMap,
@@ -301,7 +374,6 @@
         let prevCursorPos = 0;
         let prevTextLen = 0;
 
-        // Sync viewer on input
         const originalOnInput = config.onInput;
         converter.setOptions({
             onInput: (text) => {
@@ -310,7 +382,6 @@
             }
         });
 
-        // 커서 위치 및 길이 동기화를 위해 클릭이나 키업 시에도 이전 값을 업데이트합니다.
         const updatePrevStats = () => {
             prevCursorPos = converter.getCursorPosition();
             prevTextLen = converter.getConvertedTextLength();
@@ -318,12 +389,10 @@
         editor.addEventListener('click', updatePrevStats);
         editor.addEventListener('keyup', updatePrevStats);
 
-        // Global functions for UI controls
         window.appendEmoji = (key) => {
             converter.insertText(`:${key}:`);
         };
 
-        // 키 조합 로깅을 위한 이벤트 리스너 추가
         editor.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.metaKey || e.altKey) {
                 const keys = [];
@@ -340,14 +409,14 @@
 
         window.clearEditor = () => {
             converter.clear();
-            addLog('action', 'Editor cleared');
+            addLog('action', currentLang === 'en' ? 'Editor cleared' : '에디터 내용 삭제됨');
         };
 
         window.setSampleText = () => {
             const keys = Object.keys(keywordMap).map(k => `:${k}:`).join(' ');
-            const sample = `안녕하세요! 모든 이모티콘을 사용해봅니다.\n${keys}\n다양한 그룹 권한과 함께 테스트해보세요!`;
+            const sample = TRANSLATIONS[currentLang].sample_text.replace('{keys}', keys);
             converter.setText(sample);
-            addLog('action', 'All emoticons sample text applied');
+            addLog('action', currentLang === 'en' ? 'Sample text applied' : '샘플 텍스트 설정됨');
         };
 
         window.toggleGroup = (group, isAllowed) => {
@@ -367,13 +436,37 @@
             addLog('config', `Option [${key}] set to ${value}`);
         };
 
-        // Logging system
+        window.changeLanguage = (lang) => {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-ko').classList.toggle('active', lang === 'ko');
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (TRANSLATIONS[lang][key]) {
+                    el.textContent = TRANSLATIONS[lang][key];
+                }
+            });
+
+            const kofiImg = document.getElementById('kofi-img');
+            if (kofiImg) {
+                kofiImg.src = `./assets/kofi-button-${lang}.svg`;
+            }
+
+            const newPlaceholder = TRANSLATIONS[lang].placeholder;
+            converter.setOptions({ placeholder: newPlaceholder });
+            
+            addLog('system', `Language changed to ${lang === 'en' ? 'English' : '한국어'}`);
+        };
+
         const logList = document.getElementById('log-list');
         function addLog(type, msg) {
             const entry = document.createElement('div');
             entry.className = 'log-entry';
             
-            const time = new Date().toLocaleTimeString('ko-KR', { hour12: false });
+            const time = new Date().toLocaleTimeString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { hour12: false });
             entry.innerHTML = `
                 <span class="log-time">[${time}]</span>
                 <span class="log-type">${type.toUpperCase()}</span>
@@ -388,20 +481,6 @@
             logList.innerHTML = '';
         };
 
-        // Initial Log
-        addLog('system', 'Converter initialized');
-    </script>
-</body>
-</html>
-           logList.appendChild(entry);
-            logList.scrollTop = logList.scrollHeight;
-        }
-
-        window.clearLog = () => {
-            logList.innerHTML = '';
-        };
-
-        // Initial Log
         addLog('system', 'Converter initialized');
     </script>
 </body>

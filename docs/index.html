@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,10 +20,41 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             z-index: 10;
         }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         h1 {
             font-size: 18px;
             margin: 0;
             color: #1c1e21;
+        }
+        .lang-switcher {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .lang-btn {
+            background: none;
+            border: 1px solid transparent;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #65676b;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .lang-btn:hover {
+            background: #f2f2f2;
+        }
+        .lang-btn.active {
+            background: #ebf5ff;
+            border-color: #1877f2;
+            color: #1877f2;
+            font-weight: 600;
         }
         .main-container {
             display: flex;
@@ -70,7 +101,7 @@
             border-color: #1877f2;
         }
         #readonly-container {
-            border: 2px solid #ff9800; /* Different border color */
+            border: 2px solid #ff9800;
             border-radius: 8px;
             padding: 16px;
             min-height: 40px;
@@ -90,10 +121,13 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         .control-group {
-            margin-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .control-group:last-child {
+            margin-bottom: 0;
         }
         .control-group h3 {
-            font-size: 14px;
+            font-size: 13px;
             margin: 0 0 12px 0;
             color: #65676b;
             text-transform: uppercase;
@@ -157,28 +191,39 @@
         .log-type { color: #4ec9b0; font-weight: bold; margin-right: 8px; }
         .log-msg { color: #ce9178; word-break: break-all; }
     </style>
-  <script type="module" crossorigin src="./assets/index-DsSeXce0.js"></script>
+  <script type="module" crossorigin src="./assets/index-B50AfN_J.js"></script>
 </head>
 <body>
     <div class="header">
-        <h1>Emoticon Text Converter Playground</h1>
+        <div class="header-content">
+            <h1 data-i18n="header_title">Emoticon Text Converter Playground</h1>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="lang-switcher">
+                    <button onclick="changeLanguage('en')" id="lang-en" class="lang-btn active">English</button>
+                    <button onclick="changeLanguage('ko')" id="lang-ko" class="lang-btn">한국어</button>
+                </div>
+                <a id="kofi-link" href="https://ko-fi.com/11character" target="_blank">
+                    <img id="kofi-img" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTcwIiBoZWlnaHQ9IjQ1IiB2aWV3Qm94PSIwIDAgMTcwIDQ1IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDwhLS0gUmlnaHQvQm90dG9tIFNoYWRvdyBmb3IgM0QgZWZmZWN0IC0tPgogIDxyZWN0IHg9IjUiIHk9IjUiIHdpZHRoPSIxNjAiIGhlaWdodD0iMzUiIGZpbGw9IiMxYTg3YjMiIHJ4PSIyIi8+CiAgPCEtLSBNYWluIEJ1dHRvbiBCb2R5IC0tPgogIDxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIxNjAiIGhlaWdodD0iMzUiIGZpbGw9IiMyOWFiZTAiIHJ4PSIyIi8+CiAgPCEtLSBLby1maSBJY29uICYgVGV4dCAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMCwgMTIpIj4KICAgIDxwYXRoIGQ9Ik0yLjUgMEMxLjExOTMgMCAwIDEuMTE5MyAwIDIuNVYxMC41QzAgMTEuODgwNyAxLjExOTMgMTMgMi41IDEzSDEwLjVDMTEuODgwNyAxMyAxMyAxMS44ODA3IDEzIDEwLjVWOEgxNC41QzE1Ljg4MDcgOCAxNyA2Ljg4MDcgMTcgNS41VjIuNUMxNyAxLjExOTMgMTUuODgwNyAwIDE0LjUgMEgyLjVaTTEzIDIuNVY1LjVIMTQuNVYyLjVIMTNaTTIuNSAyLjVIMTAuNVYxMC41SDIuNVYyLjVaIiBmaWxsPSJ3aGl0ZSIvPgogICAgPHRleHQgeD0iMjQiIHk9IjExIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sIEJsaW5rTWFjU3lzdGVtRm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iOTAwIiBmb250LXNpemU9IjEzcHgiIGxldHRlci1zcGFjaW5nPSIxcHgiPlNVUFBPUlQgTUU8L3RleHQ+CiAgPC9nPgo8L3N2Zz4=" alt="Support me on Ko-fi" style="height: 36px; vertical-align: middle;">
+                </a>
+            </div>
+        </div>
     </div>
     
     <div class="main-container">
         <div class="left-panel">
             <div class="editor-section">
-                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;">읽기 전용 뷰어 (실시간 반영)</span>
+                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;" data-i18n="readonly_label">Read-only Viewer (Real-time)</span>
                 <div id="readonly-container"></div>
             </div>
 
             <div class="editor-section">
-                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;">에디터 입력</span>
+                <span class="label" style="font-size: 12px; color: #666; margin-bottom: 8px; display: block;" data-i18n="editor_label">Editor Input</span>
                 <div id="editor-container"></div>
             </div>
 
             <div class="control-panel">
                 <div class="control-group">
-                    <h3>이모티콘 빠른 추가</h3>
+                    <h3 data-i18n="quick_add_title">Quick Add Emoticons</h3>
                     <div class="flex-row">
                         <button onclick="appendEmoji('smile')">😊 :smile: <small style="color: #888">(basic, premium)</small></button>
                         <button onclick="appendEmoji('heart')">❤️ :heart: <small style="color: #888">(basic, premium)</small></button>
@@ -190,44 +235,36 @@
                 </div>
 
                 <div class="control-group">
-                    <h3>데이터 조작</h3>
+                    <h3 data-i18n="data_manip_title">Data Manipulation</h3>
                     <div class="flex-row">
-                        <button onclick="clearEditor()">내용 비우기</button>
-                        <button onclick="setSampleText()">모든 이모티콘 포함 샘플 설정</button>
+                        <button onclick="clearEditor()" data-i18n="clear_btn">Clear Content</button>
+                        <button onclick="setSampleText()" data-i18n="sample_btn">Set Sample Text</button>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>허용 그룹 설정 (allowedGroups)</h3>
+                    <h3 data-i18n="groups_title">Allowed Groups Settings (allowedGroups)</h3>
                     <div class="flex-row">
                         <label class="toggle-item">
-                            <input type="checkbox" checked onchange="toggleGroup('basic', this.checked)"> basic (기본)
+                            <input type="checkbox" checked onchange="toggleGroup('basic', this.checked)"> <span data-i18n="group_basic">basic (Default)</span>
                         </label>
                         <label class="toggle-item">
-                            <input type="checkbox" onchange="toggleGroup('premium', this.checked)"> premium (프리미엄)
+                            <input type="checkbox" onchange="toggleGroup('premium', this.checked)"> <span data-i18n="group_premium">premium (Premium)</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>기능 옵션</h3>
+                    <h3 data-i18n="options_title">Feature Options</h3>
                     <div class="flex-row">
                         <label class="toggle-item">
-                            <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> 엔터 줄바꿈 비활성화 (Shift+Enter는 허용)
+                            <input type="checkbox" onchange="toggleOption('disableEnter', this.checked)"> <span data-i18n="option_disable_enter">Disable Enter for New Line (Shift+Enter allowed)</span>
                         </label>
                         <label class="toggle-item" style="margin-left: 12px; display: flex; align-items: center; gap: 8px;">
-                            <span>이모티콘 크기:</span>
+                            <span data-i18n="option_size_label">Emoticon Size:</span>
                             <input type="range" min="16" max="64" value="24" oninput="toggleOption('emoticonSize', parseInt(this.value)); document.getElementById('size-display').textContent = this.value + 'px';">
                             <span id="size-display" style="min-width: 40px;">24px</span>
                         </label>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <h3>데이터 조작</h3>
-                    <div class="flex-row">
-                        <button onclick="clearEditor()">내용 비우기</button>
-                        <button onclick="setSampleText()">샘플 텍스트 설정</button>
                     </div>
                 </div>
             </div>
@@ -242,18 +279,5 @@
         </div>
     </div>
 
-</body>
-</html>
-           logList.appendChild(entry);
-            logList.scrollTop = logList.scrollHeight;
-        }
-
-        window.clearLog = () => {
-            logList.innerHTML = '';
-        };
-
-        // Initial Log
-        addLog('system', 'Converter initialized');
-    </script>
 </body>
 </html>
