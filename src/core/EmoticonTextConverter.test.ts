@@ -90,6 +90,25 @@ describe('EmoticonTextConverter', () => {
     expect(converter.getText()).toBe('Hello World');
   });
 
+  it('should replace selected text with new text', () => {
+    converter.setText('Hello Beautiful World');
+    
+    // "Beautiful"의 논리적 오프셋은 6부터 15까지입니다.
+    const { node: startNode, nodeOffset: startOffset } = CursorManager.getLocalOffsetData(target, 6);
+    const { node: endNode, nodeOffset: endOffset } = CursorManager.getLocalOffsetData(target, 15);
+    
+    const range = document.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    
+    converter.insertText('Small');
+    expect(converter.getText()).toBe('Hello Small World');
+  });
+
   it('should insert text correctly after an emoticon', () => {
     converter.setText('A :smile: B');
     CursorManager.setCursorPosition(target, 3);

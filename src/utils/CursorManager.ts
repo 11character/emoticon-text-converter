@@ -30,6 +30,43 @@ export class CursorManager {
   }
 
   /**
+   * 이모티콘(img)과 줄바꿈(br)을 각각 1글자로 취급하여 현재 선택 영역의 논리적 시작과 끝 위치를 반환합니다.
+   * @param {HTMLElement} root - 대상 contenteditable 요소
+   * @returns {{ start: number; end: number }} 논리적 시작과 끝 위치
+   */
+  static getSelectionRange(root: HTMLElement): { start: number; end: number } {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return { start: 0, end: 0 };
+
+    const range = selection.getRangeAt(0);
+    
+    // 시작 위치가 root 내부에 없는 경우 0, 0 반환
+    if (!root.contains(range.startContainer) && root !== range.startContainer) {
+      return { start: 0, end: 0 };
+    }
+
+    const getOffset = (node: Node, offset: number): number => {
+      const r = range.cloneRange();
+      r.selectNodeContents(root);
+      r.setEnd(node, offset);
+      const frag = r.cloneContents();
+      const div = document.createElement('div');
+      div.appendChild(frag);
+      return this.getLogicalLength(div);
+    };
+
+    const start = getOffset(range.startContainer, range.startOffset);
+    let end = start;
+
+    // 선택 영역이 있고 끝 위치가 root 내부에 있는 경우 끝 위치 계산
+    if (!range.collapsed && (root.contains(range.endContainer) || root === range.endContainer)) {
+      end = getOffset(range.endContainer, range.endOffset);
+    }
+
+    return { start, end };
+  }
+
+  /**
    * 요소 내의 논리적 텍스트 길이를 계산합니다. (img, br은 1글자로 취급)
    * @param {HTMLElement} element 
    * @returns {number}

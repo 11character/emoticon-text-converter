@@ -274,13 +274,14 @@ export class EmoticonTextConverter {
       return;
     }
 
-    const cursorOffset = CursorManager.getCursorPosition(this.element);
+    const { start, end } = CursorManager.getSelectionRange(this.element);
     const text = this.getText();
 
-    const textIndex = this.getOriginalTextIndex(cursorOffset);
+    const startIndex = this.getOriginalTextIndex(start);
+    const endIndex = this.getOriginalTextIndex(end);
 
-    const startText = text.slice(0, textIndex);
-    const endText = text.slice(textIndex);
+    const startText = text.slice(0, startIndex);
+    const endText = text.slice(endIndex);
 
     const newText = `${startText}${str}${endText}`;
     

@@ -80,6 +80,61 @@ describe('CursorManager', () => {
     });
   });
 
+  describe('getSelectionRange', () => {
+    it('선택 영역이 없는(collapsed) 경우 start와 end가 같아야 한다', () => {
+      container.textContent = 'Hello Selection';
+      const textNode = container.firstChild as Text;
+      
+      const range = document.createRange();
+      range.setStart(textNode, 6); // 'Hello |Selection'
+      range.collapse(true);
+      
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+
+      const result = CursorManager.getSelectionRange(container);
+      expect(result.start).toBe(6);
+      expect(result.end).toBe(6);
+    });
+
+    it('텍스트 영역이 선택된 경우 논리적 시작과 끝을 정확히 반환해야 한다', () => {
+      container.textContent = 'Hello Selection';
+      const textNode = container.firstChild as Text;
+      
+      const range = document.createRange();
+      range.setStart(textNode, 6);
+      range.setEnd(textNode, 15); // 'Hello [Selection]'
+      
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+
+      const result = CursorManager.getSelectionRange(container);
+      expect(result.start).toBe(6);
+      expect(result.end).toBe(15);
+    });
+
+    it('이미지를 포함한 영역이 선택된 경우 위치를 정확히 계산해야 한다', () => {
+      container.innerHTML = 'A<img src="test.png">B';
+      // 구조: [Text("A"), Img, Text("B")]
+      const textA = container.childNodes[0] as Text;
+      const textB = container.childNodes[2] as Text;
+      
+      const range = document.createRange();
+      range.setStart(textA, 0); // 시작: 'A' 앞
+      range.setEnd(textB, 1);   // 끝: 'B' 뒤
+      
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+
+      const result = CursorManager.getSelectionRange(container);
+      expect(result.start).toBe(0);
+      expect(result.end).toBe(3); // 'A'(1) + img(1) + 'B'(1) = 3
+    });
+  });
+
   describe('getLocalOffsetData', () => {
     it('텍스트 노드 내의 위치를 정확히 찾아야 한다', () => {
       container.textContent = 'Hello World';
