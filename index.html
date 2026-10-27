@@ -280,6 +280,8 @@
 
     <script type="module">
         import { EmoticonTextConverter } from './src/index.ts';
+        import kofiBtnEn from './assets/kofi-button-en.svg';
+        import kofiBtnKo from './assets/kofi-button-ko.svg';
 
         const TRANSLATIONS = {
             en: {
@@ -452,7 +454,7 @@
 
             const kofiImg = document.getElementById('kofi-img');
             if (kofiImg) {
-                kofiImg.src = `./assets/kofi-button-${lang}.svg`;
+                kofiImg.src = lang === 'ko' ? kofiBtnKo : kofiBtnEn;
             }
 
             const newPlaceholder = TRANSLATIONS[lang].placeholder;
